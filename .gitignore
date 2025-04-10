@@ -1,0 +1,22 @@
+# dependencies
+/node_modules
+
+# misc
+.DS_Store
+
+# env
+.env
+
+# ビルドされたアセット(css, js) ※ファイル納品やMMが公開するケースはignoreを解除する。
+public/assets/*
+
+
+# Basic認証
+.htaccess
+.htpasswd
+
+# 重い動画は除外
+# smb://192.168.1.150/share/朝日新聞/CREATIVE_MUSEUM_TOKYO/重いアセット(本番用) に格納
+*.mp4
+*.mp3
+*.pdf
