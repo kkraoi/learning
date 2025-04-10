@@ -352,7 +352,7 @@ rails db:migrate
 ```
 でマイグレートする。
 
-その後、モデルファイルに、
+その後、モデルファイル:モデル名(小文字).rbに、
 ```
 has_one_attached :image
 ```
