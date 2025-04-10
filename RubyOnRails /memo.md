@@ -358,6 +358,21 @@ has_one_attached :image
 ```
 を書き込んで、imageカラムが追記されたかのように扱われるようにする。
 
+## 画像のサイズ変更
+「image_processing」というGemを用いて画像サイズの変更を行う。
+
+```
+# Gemfile
+gem 'image_processing', '~>1.2'
+```
+を追記またはコメントアウト解放。その後、`bunlde install`
+
+エラー回避のため、
+```
+# config/environments/development.rb
+config.active_job.queue_adapter = :inline
+```
+を追記
 
 ## createアクションとの関係
 
