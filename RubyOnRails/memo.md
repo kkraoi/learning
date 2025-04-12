@@ -293,8 +293,6 @@ flash[:notice] = "投稿に成功しました。"
 <% end %>
 ```
 
-
-
 # ruby文法
 
 ## メソッド シンボル ブロック
@@ -337,27 +335,6 @@ banana_path(list.id)
 "/lists/#{list.id}"
 ```
 
-## ActiveStorageとは
-Railsで画像の投稿や表示を行うためのものです。
-画像は通常のカラムとして保存できないため、特別な保存方法が必要になり、それを行うのがActiveStorageです。
-
-```
-rails active_storage:install
-```
-でインストール、マイグレーションファイルができる。
-
-その後、
-```
-rails db:migrate
-```
-でマイグレートする。
-
-その後、モデルファイル:モデル名(小文字).rbに、
-```
-has_one_attached :image
-```
-を書き込んで、imageカラムが追記されたかのように扱われるようにする。
-
 ## 画像のサイズ変更
 「image_processing」というGemを用いて画像サイズの変更を行う。
 
@@ -373,8 +350,6 @@ gem 'image_processing', '~>1.2'
 config.active_job.queue_adapter = :inline
 ```
 を追記
-
-## createアクションとの関係
 
 ## オプション
 url: どのURLへフォームの情報を送信するか。<br>
@@ -438,6 +413,8 @@ renderで定義したビューファイルを表示する。
 
 renderするビューに必要なインスタンス変数は、あらかじめ用意しなくてはならない!
 
+renderによって、コントローラからビューファイルにハンドルが移るイメージ。
+
 ## rails c
 
 "rails c"では、主に下記三つのことを行うことができます。
@@ -481,146 +458,181 @@ end
   config.active_support.deprecation = :silence
 ```
 
-#　アプリケーション作成作業まとめ
-下記の順で作業を進めていく。
+## 追加でページを作成する手順。
+途中で、Aboutページの作成するとしたら、
 
-## アプリケーション作成
+### 1:　コントローラを設定
+既存の大元となるコントローラ(ここではhomesコントローラ)に、
 ```
-rails new アプリケーション名
-cd アプリケーションディレクトリ
-```
-
-## github連携
-1. `git branch -M main`
-2. `git remote add origin リモートリポジトリURL`
-3. 初回コミット。`[Start]コミットメッセージ`
-
-## Springダウングレード
-1. Gemfile.lockにて、 springが4.3系になっていることを確認する。なっていたら、`4.2.1`に変更する。
-2. `spring stop` をする。springが起動していなかったらOK。
-3. `bundle install`を実行し、パッケージを更新する。
-
-## solargraphインストール
-```
-# Gemfile
-group :development do
-  gem 'solargraph'
+def about
 end
 ```
-そして、`bundle install`を実行し、パッケージを更新する。
+アクションを追加する。
 
-## ホスト許可の設定
-config/environments/development.rbを編集。
-```
-  ...
-  config.hosts.clear
-end
-```
-末行に`config.hosts.clear`を記述。
-「メンターが課題のレビューをする」「チーム開発等で他人と共同開発をする」ため。
+### 2: ビューファイルを作成
+app/views/homes/about.html.erb<br>
+を作成する。
 
-## pry 導入
-【Gemfile】
+### 3: ルーティングを設定
 ```
-group :development, :test do
-  gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
-  gem 'pry-rails' <= 追加
-end
+get "homes/about", to: "homes#about", as: "about"
 ```
-その後、`bundle install`。`rails c`を実行して、
-```
-username:~/environment/sample_app $ rails c
-Running via Spring preloader in process 7584
-Loading development environment (Rails 6.1.7.7)
-[1] pry(main)>
-```
-のような表示になればOK。
+名前付きルート（パス名）をaboutにしている。
 
-## フロントで必要なプラグインを追加する
+## アソシエーション 関連付け機能
+テーブルとテーブルを結びつける。<br>
+Railsでは「1:Nの関係」は、DBの構造の設計 + Railsの規約に従って、<br>
+「モデル」に記載して、モデル間の関係性を機能として持たせる。<br>
+Railsでは6種の関連付けがある。
+
+以降は、Articleモデル（記事）とUserモデル（投稿者）を例として記載していく。
+
+### belongs_to
+記事視点でのArticleテーブルとUserテーブルの関系。<br>
+記事は一人の投稿者に属している。
 ```
-yarn add @babel/plugin-proposal-private-methods @babel/plugin-proposal-private-property-in-object
+# app/models/article.rbにて
+belongs_to :user
 ```
 
-## モデルを作成
+### has_many
+投稿者視点でのArticleテーブルとUserテーブルの関系。<br>
+投稿者は記事をいくつも持っている。
 ```
-rails g model モデル名(先頭文字大文字, 例: List)
+# app/models/user.rbにて
+has_many :articles, dependent: :destroy
 ```
-db/migrate/(作成日時)_create_lists.rb(マイグレーションファイル)にて、スキーマ(カラム)作成。<br>
-ブロックのコーディングルール: ` t.データ型 :カラム名`。
+dependent: destroy によって、userのあるデータを消すと、それに紐付いたarticlesを自動的に削除する。<br>
+下記のコードでユーザーid:1を外部キーとして所持しているarticleをすべて削除できる。
+```
+@user = User.find(1)
+@user.destroy
+```
 
+### 各テーブルが親子関係にある場合
+アプリ/config/routes.rbにて
 ```
-rails db:migrate
-```
-にてスキーム（テーブル）作成。db/schema.rbにて問題ないか確認。
-
-```
-  create_table "モデル名(小文字)s", force: :cascade do |t|
-    t.string カラム名1
-    t.string カラム名2
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+  resources :親テーブル, only: [:new, :create, ...など] do
+    resources :子テーブル, only: [:create, ...など]
   end
 ```
-となっていればOK。
+このように書くと良い。
 
-### 注意点
-既存のテーブルへのカラムの追加や削除を行う場合、テーブルを作成するマイグレーションファイルを直接編集するのは避けましょう。
-直接テーブルの編集を行ってしまうと、次のような問題が発生する場合があります。
-
-修正したテーブルの内容を反映させるために、マイグレーションをやり直す必要があるため既存のデータが消えてしまう
-他のテーブルで使用されているカラムなどを消してしまった場合、マイグレーションそのものがうまく行かなくなることがある
-基本的にはカラムの変更については、カラムの追加/削除のコマンドを使用して行うようにしましょう。
-
-## コントローラ作成
+これによって、下記のように親子関係をURLとパラメータで明示できる。
 ```
-rails g controller コントローラ名(小文字s) ビューページ1 ビューページ2
-⇩ 例
-rails g controller homes top
+POST /posts/:親_id/子s
 ```
-実はこのコマンドで、コントローラ作成と同時に、必要なviewファイルの作成や記述の追加を、簡単に実現できる。<br>
-つまり、下記の4つの手順が全て完了となる。<br>
-=> `rails g controller コントローラ名(小文字s) new index show edit`
 
-1. コントローラ初期化: `rails g controller コントローラ名`
-2. `app/controllers/コントローラ名_controller.rb`にて、メソッドとしてアクションを追加する。
-3. `config/routes.rb`にて、`HTTPメソッド 'URL' => 'コントローラ#アクション'`により、ルーティングを作成する。
-4. `app/views/コントローラ名/アクション名.html.erb`を作りHTMLを書き込むことで、ビューを作成する。
+また、ネストすることによって
+```
+<%= form_with model: [@親, @子] do |f| %>
+↓ これに変換される
+<form action="/親s/:id/子s" method="post">
+```
+のように、リストが連結される。この場合、createには親と子、両方のモデルの情報が必要になる。<br>
+ネストされたリソースでは、URLに親リソースのIDが含まれる(/post_images/:post_image_id/post_comments)
 
 ちなみに、
-- new:	データの新規作成フォームを表示する
-- create:	データを追加（保存）する
-- index:	データの一覧を表示する
-- show:	データの内容（詳細）を表示する
-- edit:	データを更新するためのフォームを表示する
-- update:	データを更新する
-- destroy:	データを削除する
-これらのアクションを作るのが一般的なのでコントローラファイルに
-
-### ルートトップページ作成
 ```
-rails g controller homes top
+resource :favorite, only: [:create, :destroy]
 ```
-より、トップ用のビューファイルを作り、
+のように単数系にすると、/:idがURLに含まれなくなります。<br>
+resourceは「それ自身のidが分からなくても、関連する他のモデルのidから特定できる」といった場合に用いることが多いです。
+
+## 正しい命名規則
+Railsには以下のような命名規則がある：
+
+| 概要                     | 名前の例               | 命名スタイル                | 備考                                                         |
+|--------------------------|------------------------|-----------------------------|--------------------------------------------------------------|
+| **モデル名**             | `User`                 | キャメルケース（単数形）     | クラス名なので最初大文字。データ1件を表す。                  |
+| **モデルファイル名**     | `user.rb`              | スネークケース（単数形）     | `app/models`内に置かれる。                                  |
+| **テーブル名**           | `users`                | スネークケース（複数形）     | DBのテーブル。マイグレーションファイルで定義される。         |
+| **コントローラー名**     | `UsersController`      | キャメルケース（複数形）     | クラス名。複数のリソースを扱うため複数形。                   |
+| **コントローラーファイル名** | `users_controller.rb`   | スネークケース（複数形）     | `app/controllers`内に置かれる。                             |
+| **ビューのディレクトリ名**   | `users/`               | スネークケース（複数形）     | `app/views`以下に配置。コントローラー名と一致させる。        |
+| **ルーティングのパス**       | `/users`, `/users/:id` | スネークケース（複数形）     | RESTfulなURLパス。                                           |
+
+## バリデーション
+
+### フォームより、画像が必ず入力されるようにする
+app/models/モデル.rbより、
 ```
-Rails.application.routes.draw do
-  root to: 'homes#top'
-  ...
+validates :カラム名, presence: true
 ```
-とする。ちなみに`to:`は省略できる。
+対象のカラムが**空（nil や 空文字 ""）はNGとなる。
 
-また、resourcesメソッドではまとめる必要はない(まとめられない)
-
-## ルートを設定する
-ルーティングを一括して自動生成する。
-
-【config/routes.rb】
+### 複数回押せないように制限する
+app/models/モデル名.rbにて、
 ```
-resources :小文字モデルs
-⇩　例
+validates :カラム名1, uniqueness: {scope: :カラム名2}
+↓ 例
+validates :user_id, uniqueness: {scope: :post_image_id}
+```
+user_idとpost_image_idのペアが一意である（重複しない）状態に制限する。<br>
+バリデーションにおいてuniquenessを指定することで、<br>
+validatesメソッドの引数であるuser_idカラムの値が<br>
+すでにテーブルに保存されている値と重複していないかをチェックしてくれるようになります。<br>
+またscopeの指定もすることができ、このように記述することでuser_idとpost_image_idのペアに対して、<br>
+すでに同じ値のペアがテーブルに保存されていないかを判定してくれます。
 
-Rails.application.routes.draw do
-  resources :lists
+## 共通化
+### 部分テンプレートのファイル名
+Railsでは、ファイル名の先頭にアンダースコア（_）付きのファイルが、部分テンプレートファイルとして認識されます。
+```
+app/views/post_images/_list.html.erb
+```
+みたいな。
+
+### 部分テンプレート用にコードを変更する
+部分テンプレートファイル内でインスタンス変数を利用すると、<br>
+controller側でインスタンス変数の名前や挙動を変更したとき、<br>
+部分テンプレート側も変更しなければいけません。<br>
+これでは、再利用しにくいテンプレートになってしまいますね。
+
+部分テンプレートが呼び出されたときに、Viewから渡される変数が使えるように変更します。<br>
+この変数には、ローカル変数を使います。
+
+例えば、「@post_imagesをpost_images」のように変更する。
+
+### 部分テンプレートファイルを呼び出せるようにする
+大元のerbファイルから呼び出す場合、
+```
+<%= render [部分テンプレートファイルの指定], [ローカル変数]:[渡す値] %>
+↓ 例
+<%= render 'list', post_images: @post_images %>
+```
+とする。
+
+post_images/list.html.erbのようなパスが本来の呼び出し方だが、<br>
+拡張子は省略でき、同じフォルダ内から呼び出す場合はフォルダ名も省略できる。
+
+## ストロングパラメータ
+フォームのデータを制限する。
+
+```
+private
+def フォームからのデータキー_params
+  params.require(:フォームからのデータキー).permit(:カラム, :カラム1, ...)
 end
 ```
+- params: フォームから送られてきたデータが入ってる。
+- require(:キー): キーの中にデータがあることを期待。
+- permit(...): その中で、受け取ってOKなカラム（＝セキュリティ的に許可するやつ）を指定。
 
-`rails routes`コマンドでルーティングを確認。
+ちなみに、ストロングパラメータがフォームの値によってエラーかどうかをバリデーションするわけではない。<br>
+(errorメソッド発火はこれによるものではない。)
+
+errorメソッドは、
+- モデルインスタンス.save
+- モデルインスタンス.valid?
+- モデルインスタンス.update()
+- モデルインスタンス.create()
+などによりバリデーションされてから使える。
+
+ちなみに、モデルインスタンスは、`モデル.new()`のことで、
+- モデル クラスの 新しいインスタンス（≒オブジェクト） を作る
+- データベースにはまだ保存されていない状態
+- フォームに値を渡すためなどに使う
+
+ちなみに、 .save!, .update!, .create!<br>
+「!（バン）」がつくバージョンは、バリデーションに失敗したら例外（エラー）を発生させる。
