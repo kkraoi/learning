@@ -190,6 +190,23 @@ end
 - `current_user.name`: 今ログインしているユーザーの名前を表示
 - `current_user.email`: 今ログインしているユーザーのメールアドレスを表示
 
+### before_action
+【before_actionが入ったフロー】
+1. ルーティングで指定したパスにアクセス
+2. ルーティングを確認する
+3. before_actionで設定したメソッドを実行する <= ここ！
+4. ルーティングで設定したアクションを実行する
+5. アクションに紐づいたビューファイルを使ってページを表示
+
+```
+before_action :メソッド名, except: [:アクション名]
+before_action :メソッド名, only: [:アクション名]
+```
+- `before_action`: このコントローラが動作する前にメソッド名が実行される。
+- `except:`: 適用しないアクションを選ぶ
+- `only:`: 適用するアクションを選ぶ
+
+
 ## 権限の設定
 app/controllers/application_controller.rbにて
 ```
@@ -202,3 +219,4 @@ before_action :authenticate_user!, except: [:top]
 - before_action: このコントローラが動作する前に実行されます。
 - authenticate_user!: ログイン認証されていなければ、ログイン画面へリダイレクトする。
 - except: 指定したアクションをbefore_actionの対象から外します。
+
