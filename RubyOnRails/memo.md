@@ -674,3 +674,13 @@ class UsersController < ApplicationController
   ...
 ```
 を追記する。
+
+## Railsアプリの初期設定
+/config/initializersにて、
+- application.rb:	全ての環境で共通して使用する設定
+- environment/:	開発環境や本番環境など、環境ごとの設定ファイルを保存するフォルダ。development.rb, test.rbなど
+- initializers/:	RailsやGemに関する細々とした初期設定ファイルを保存するフォルダ
+- locales/:	複数言語の対応など、国際化対応に必要なファイルを保存するフォルダ
+
+/config/initializersフォルダは、Railsアプリを起動したときに、一緒に読み込まれる設定ファイルを集めたものです。<br>
+Gemをインストールしている場合、初期設定ファイルが/config/initializersに格納されることもあります。<br>
