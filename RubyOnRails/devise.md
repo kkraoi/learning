@@ -50,6 +50,21 @@ Rails.application.routes.draw do
 end
 ```
 
+【注意！】
+```
+resources :users, only: [..., :show]
+devise_for :users
+```
+この順にすると、/users/sign_upページなどでフォームが表示されなくなる。<br>
+/users/sign_up をアクセスしようとすると、<br>
+まず resources :users のルーティングが優先されて、<br>
+:id => "sign_up" だと勘違いされて users#show を探しにいってしまう。<br>
+下記の順番を守ること。
+```
+devise_for :users
+resources :users, only: [..., :show]
+```
+
 以降の文はnameカラムを実装する前提で進める。
 
 ### ページを表示させる。
@@ -73,6 +88,7 @@ rails g devise:views
 ```
 によって、devise のさまざまな機能と関連付ける。
 
+【サインアップ: /users/sign_up】<br>
 app/views/devise/registrations/new.html.erbより
 ```
 <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
@@ -85,29 +101,12 @@ app/views/devise/registrations/new.html.erbより
 </div>
 ```
 
+【ログイン: /users/sign_in】<br>
+/app/views/devise/sessions/new.html.erbにて、上記と同様に.field追記
+
 ### Controllerの設定
-現状、nameを入力してもデータとして保存できない状態になっている。
-
-app/controllers/application_controller.rbより、
-```
-class ApplicationController < ActionController::Base
-  # このように記述することで、devise利用の機能（ユーザ登録、ログイン認証など）が使われる前に
-  # configure_permitted_parametersメソッドが実行されます。
-  before_action :configure_permitted_parameters, if: :devise_controller?
-
-  # privateは記述をしたコントローラ内でしか参照できません。
-  # 一方、protectedは呼び出された他のコントローラからも参照することができます。
-  protected
-
-  def configure_permitted_parameters
-    # ユーザー登録(sign_up)の際に、ユーザー名(name)のデータ操作を許可しています。
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:name])
-  end
-end
-```
-このように記述して、ストロングパラメータを設定する。<br>
-deviseのコントローラは直接修正できないため、全てのコントローラに対する処理を行える権限を持つ、ApplicationControllerに
-記述する必要があります。
+現状、nameを入力してもデータとして保存できない状態になっている。<br>
+[nameフィールドでログイン・サインインできるようにする。](#nameフィールドでログイン・サインインできるようにする。)を参照せよ
 
 ついでに、ログアウトリンクなども作成しておく。<br>
 app/views/layouts/application.html.erbにて、
@@ -156,16 +155,15 @@ app/controllers/application_controller.rbにて
 class ApplicationController < ActionController::Base
   ...略
 
-  ##
-  # サインイン後にどこに遷移するかを設定しているメソッド
+  # ログイン(サインイン)後にどこに遷移するかを設定するdeviseフックメソッド
+  #
   # @param resource [Instance] ログインを実行したモデルのデータ、今回の場合はつまりログインしたUserのインスタンス
-  # @return [String] サインイン後にリダイレクトするパス
+  # @return [String] ログイン(サインイン)後にリダイレクトするパス
   def after_sign_in_path_for(resource)
     about_path
   end
 
-  ##
-  # サインアウト後にどこに遷移するかを設定しているメソッド
+  # サインアウト後にどこに遷移するかを設定しているdeviseフックメソッド
   # @param param [Instance] アウトを実行したモデルのデータ、今回の場合はつまりログインしたUserのインスタンス
   # @return [String] サインアウト後にリダイレクトするパス
   def after_sign_out_path_for(resource)
@@ -230,7 +228,8 @@ Devise.setup do |config|
 より、deviseの設定はconfigというオブジェクトにまとめられている。<br>
 => `config.[設定項目のキー名]`という形で定義できる。
 
-### ログインに使用するカラムの設定変更
+## nameフィールドでログイン・サインインできるようにする
+### ログイン・サインインに特定のフィールドを使用する設定変更
 ログインに使用するカラムを変更するためには、以下の手順でファイルを書き換える。
 1. `Configuration for any authentication mechanism`の項目を探す
 2. `Configuration for any authentication mechanism`の少し下にある、`# config.authentication_keys = [:email]`のコメントを解除する
@@ -242,24 +241,33 @@ config.authentication_keys = [:email]
 ↓
 config.authentication_keys = [:name]
 ```
-これによって、「認証キー」＝「ログイン認証に必要な鍵」＝「ログインに必要な要素」の設定をユーザーネームに変えた。
+これによって、「認証キー」＝「ログイン・サインイン認証に必要な鍵」＝「ログイン・サインインに必要な要素」の設定をユーザーネームに変えた。
 
-### ↑と[configure_permitted_paramters](#Controllerの設定)との関係性
-configure_permitted_paramtersメソッド<br>
-=> サインアップ時にユーザーネームを使用できるようにするメソッド。
-
-app/controllers/application_controller.erbにて、
+### サインインにemailフィールドを使用する
+app/controllers/application_controller.rbより、
 ```
+class ApplicationController < ActionController::Base
+  # このように記述することで、devise利用の機能（ユーザ登録、ログイン認証など）が使われる前に
+  # configure_permitted_parametersメソッドが実行されます。
   before_action :configure_permitted_parameters, if: :devise_controller?
 
+  # privateは記述をしたコントローラ内でしか参照できません。
+  # 一方、protectedは呼び出された他のコントローラからも参照することができます。
   protected
 
+  # サインアップにnameフィールドを有効にする
+  #
+  # @return [void]
   def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:name])
+    # ユーザー登録(sign_up)の際に、ユーザー名(email)のデータ操作を許可しています。
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:email])
   end
+end
 ```
+このように記述して、ストロングパラメータを設定する。<br>
+deviseのコントローラは直接修正できないため、全てのコントローラに対する処理を行える権限を持つ、ApplicationControllerに記述する必要があります。
 
-もしconfig.authentication_keyの値がデフォルトの[:email]のままだったら?
+## もしconfig.authentication_keyの値がデフォルトの[:email]のままだったら?
 
 config.authentication_keyとconfigure_permitted_parametersがそれぞれ何を許可しているかを考えてみると、
 
@@ -313,3 +321,12 @@ Viewファイルも修正する必要があります。<br>
 - sessions/new.html.erbからemail用の入力フォームを削除
 
 する必要があります。
+
+## サインアップ、ログイン、ログアウト のリンク
+```
+<%= link_to "Sign Up", new_user_registration_path %>
+<%= link_to "Log In", new_user_session_path %>
+<%= link_to "Log Out", destroy_user_session_path, method: :delete %>
+```
+aタグは使わない。<br>
+=> routes.rb でルーティングが変わったら、リンクが壊れる

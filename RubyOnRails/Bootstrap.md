@@ -28,7 +28,7 @@ environment.plugins.prepend(
 
 ### 3: scssファイル編集
 app/javascript/stylesheets/application.scss を作成し、<br>
-（`mkdir app/javascript/stylesheets/ && app/javascript/stylesheets/application.scss`）
+（`mkdir app/javascript/stylesheets/ & touch app/javascript/stylesheets/application.scss`）
 ```
 @use '~bootstrap/scss/bootstrap';
 ```
