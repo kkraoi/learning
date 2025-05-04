@@ -352,6 +352,22 @@ end
 io.eof? #入力の終わりまで読み込んだか？
 ```
 
+## バージョンを変える
+```
+bundle install
+↓
+Your Ruby version is x.x.x, but your Gemfile specified x.x.x
+```
+のようなエラーが出ている場合、
+```
+ruby 'x.x.x'
+```
+でバージョンを変え、
+```
+bundle install
+```
+しなおす。
+
 ## TIPS
 ### マジックコメント
 rbの1行目に`# encoding: Shift_JIS`のように書くことをマジックコメントといい、文字コードを指定することで、

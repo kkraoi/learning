@@ -112,6 +112,50 @@ Rails::Application is abstract, you cannot instantiate it directly. (RuntimeErro
 2. `spring stop` をする。springが起動していなかったらOK。
 3. `bundle install`を実行し、パッケージを更新する。
 
+## Rspec(DWCにて)
+### Gemfile 編集
+```
+group :test do
+  gem 'capybara', '>= 2.15'
+    gem 'rspec-rails'
+    gem "factory_bot_rails"
+    gem 'faker'
+end
+```
+に変更し、最後の行に
+```
+gem 'net-smtp'
+```
+を追加、その後`bundle install`。
+
+### config/environments/test.rb 編集
+```
+config.active_support.deprecation = :stderr
+↓
+config.active_support.deprecation = :silence
+```
+に変更、その後`rails db:migrate RAILS_ENV=test`でマイグレート
+
+### 実行コマンド
+```
+bundle exec rspec spec/ --format documentation
+```
+でテストを実行。
+
+- bundle exec<br>
+→ Gemfileに指定されているバージョンのRSpecを使うため。（システム全体のバージョンとズレないように）
+- rspec spec/<br>
+→ spec/ディレクトリ以下の全テストファイルを実行する、という指示。
+- --format documentation<br>
+→ テスト実行結果を見やすく整形して表示する。（例えば「〇〇ができること」というふうにツリー構造で出る）
+
+### ちなみに
+```
+bundle exec rspec spec/ --format documentation -o rspec.log
+```
+で、テスト実施後にGemfileと同じ階層にrspec.logファイルが作成される。<br>
+行が多すぎてターミナルで見れない時に使うと良い。
+
 # EC2 について
 ## `rails s -p 8080` でブラウザが永遠に読み込み
 pumaがうまく起動していないかもしれない。<br>
