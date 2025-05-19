@@ -152,3 +152,29 @@ git switch -c <新しいブランチ名>
 - バージョン2.23.0以降で使える。
 - `switch`はブランチを切り替える。
 - `-c`で新しいブランチを作り、切り替える。
+
+リモートを落とす
+```
+git fetch origin
+```
+
+チェックアウトする
+```
+git checkout feature/my-feature
+```
+
+不要なブランチを削除
+```
+git checkout develop
+git merge f_feature_shipping_list
+git branch -d f_feature_shipping_list
+```
+
+
+
+プッシュまでの流れ
+```
+git add .
+git commit -m "コミットメッセージ"
+git push origin トピックブランチ
+```
