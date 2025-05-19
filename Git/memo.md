@@ -166,8 +166,10 @@ git checkout feature/my-feature
 不要なブランチを削除
 ```
 git checkout develop
-git merge f_feature_shipping_list
-git branch -d f_feature_shipping_list
+git merge 不要ブランチ
+git branch -d 不要ブランチ
+
+git branch -D 不要ブランチ
 ```
 
 プッシュまでの流れ
