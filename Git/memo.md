@@ -155,7 +155,7 @@ git switch -c <新しいブランチ名>
 
 リモートを落とす
 ```
-git fetch origin
+git pull origin develop
 ```
 
 チェックアウトする
@@ -170,10 +170,11 @@ git merge f_feature_shipping_list
 git branch -d f_feature_shipping_list
 ```
 
-
-
 プッシュまでの流れ
 ```
+git commit --allow-empty -m "Empty commit to initialize pull request" 
+git push origin トピックブランチ
+
 git add .
 git commit -m "コミットメッセージ"
 git push origin トピックブランチ
