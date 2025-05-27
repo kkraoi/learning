@@ -816,3 +816,5 @@ Gemをインストールしている場合、初期設定ファイルが/config/
 ### 注意
 confirmはバベルをインストールしないと使えない。
 `yarn add @babel/plugin-proposal-private-methods @babel/plugin-proposal-private-property-in-object`
+
+binding.pryでフォームのパラメータを調べることができる
