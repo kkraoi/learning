@@ -82,11 +82,16 @@
 		],
 		"description": "Basic strong parameters for single model"
 	},
-		"before_action (Basic)": {
+	"before_action (Basic)": {
 		"prefix": "myb_a",
 		"body": [
 			"before_action :${1:method_name}, only: [:${2:action}]"
 		],
 		"description": "Basic before_action with action limitation"
+	},
+	"redirect_to (Flash)": {
+		"prefix": "myr_d",
+		"body": "redirect_to ${1|root_path,user_path(current_user),request.referer,fallback_location: root_path|}, ${2|notice,alert|}: '${3:Message}'",
+		"description": "Redirect with flash message"
 	}
 }
