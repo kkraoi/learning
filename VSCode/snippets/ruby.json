@@ -146,5 +146,53 @@
 		"prefix": "myvalid_num",
 		"body": "validates :${1:attribute}, numericality: { ${2|greater_than: 0,less_than: 100,only_integer: true|} }",
 		"description": "Numericality validation"
+	},
+		"Routing (Root)": {
+		"prefix": "myroot",
+		"body": "root to: '${1:controller}#${2|index,show,new|}'",
+		"description": "Root route definition"
+	},
+	"Routing (GET)": {
+		"prefix": "myget",
+		"body": [
+			"get '${1:path}', to: '${2:controller}#${3|index,show,new,create,edit,update,destroy|}', as: :${4:custom_name}",
+		],
+		"description": "GET route with two syntax options"
+	},
+	"Routing (GET_ARROW)": {
+		"prefix": "myget_arrow",
+		"body": [
+			"get '${1:path}' => '${2:controller}#${3|index,show,new,create,edit,update,destroy|}'"
+		],
+		"description": "GET route with two syntax options"
+	},
+	"Routing (Resources Basic)": {
+		"prefix": "myresources",
+		"body": "resources :${1:model}, only: [${2::index,:show,:new,:create,:edit,:update,:destroy}]",
+		"description": "Basic resources routing"
+	},
+	"Routing (Resources Advanced)": {
+		"prefix": "myresources_adv",
+		"body": [
+			"resources :${1:model} do",
+			"  collection do",
+			"    get :${2:search}",
+			"  end",
+			"  member do",
+			"    post :${3:approve}",
+			"  end",
+			"end"
+		],
+		"description": "Advanced resources routing with collection/member"
+	},
+	"Routing (Namespaced)": {
+		"prefix": "mynamespace",
+		"body": [
+			"namespace :${1:admin} do",
+			"  resources :${2:model}",
+			"  root to: '${3:dashboard}#index'",
+			"end"
+		],
+		"description": "Namespaced routing"
 	}
 }
