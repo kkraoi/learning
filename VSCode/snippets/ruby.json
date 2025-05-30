@@ -126,5 +126,25 @@
 		"prefix": "mybelongs_to_fk",
 		"body": "belongs_to :${1:モデル名}, foreign_key: :${2:カラム名}, class_name: '${3:クラス名}'",
 		"description": "belongs_to with custom FK"
+	},
+	"Validation (Presence)": {
+		"prefix": "myvalid",
+		"body": "validates :${1:attribute}, presence: true",
+		"description": "Basic presence validation"
+	},
+	"Validation (Common Combo)": {
+		"prefix": "myvalid_combo",
+		"body": "validates :${1:attribute}, presence: true, ${2|length: { minimum: 6 },format: { with: /\\A[\\w+\\-.]+@[a-z\\d\\-]+\\.[a-z]+\\z/i },uniqueness: true|}",
+		"description": "Common validation combinations"
+	},
+	"Validation (Conditional)": {
+		"prefix": "myvalid_if",
+		"body": "validates :${1:attribute}, presence: true, if: -> { ${2:condition} }",
+		"description": "Conditional validation"
+	},
+	"Validation (Numericality)": {
+		"prefix": "myvalid_num",
+		"body": "validates :${1:attribute}, numericality: { ${2|greater_than: 0,less_than: 100,only_integer: true|} }",
+		"description": "Numericality validation"
 	}
 }
