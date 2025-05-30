@@ -83,15 +83,48 @@
 		"description": "Basic strong parameters for single model"
 	},
 	"before_action (Basic)": {
-		"prefix": "myb_a",
+		"prefix": "mybefore_action",
 		"body": [
 			"before_action :${1:method_name}, only: [:${2:action}]"
 		],
 		"description": "Basic before_action with action limitation"
 	},
 	"redirect_to (Flash)": {
-		"prefix": "myr_d",
+		"prefix": "myredirect_to",
 		"body": "redirect_to ${1|root_path,user_path(current_user),request.referer,fallback_location: root_path|}, ${2|notice,alert|}: '${3:Message}'",
 		"description": "Redirect with flash message"
+	},
+		"has_many (Basic)": {
+		"prefix": "myhas_many",
+		"body": "has_many :${1:モデル名}, dependent: :${2|destroy,nullify,delete_all,restrict_with_error|}",
+		"description": "has_many association with dependent options"
+	},
+	"has_many (Conditional)": {
+		"prefix": "myhas_many_if",
+		"body": "has_many :${1:モデル名}, -> { ${2|where(active: true),order(:created_at),limit(10)|} }, dependent: :destroy",
+		"description": "has_many with scope"
+	},
+	"has_many through": {
+		"prefix": "myhas_many_through",
+		"body": "has_many :${1:モデル名}, through: :${2:中間テーブル名}",
+		"description": "has_many through association"
+	},
+	"Polymorphic Association": {
+		"prefix": "mypoly",
+		"body": [
+			"belongs_to :${1:ポリモーフィック名}, polymorphic: true",
+			"has_many :${2:モデル名}, as: :${1:ポリモーフィック名}, dependent: :destroy"
+		],
+		"description": "Polymorphic association pair"
+},
+	"belongs_to (Required)": {
+		"prefix": "mybelongs_to",
+		"body": "belongs_to :${1:モデル名}, optional: ${2|false,true|}",
+		"description": "belongs_to with optional flag"
+	},
+		"belongs_to (FK Custom)": {
+		"prefix": "mybelongs_to_fk",
+		"body": "belongs_to :${1:モデル名}, foreign_key: :${2:カラム名}, class_name: '${3:クラス名}'",
+		"description": "belongs_to with custom FK"
 	}
 }
