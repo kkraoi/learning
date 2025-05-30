@@ -81,5 +81,12 @@
 			"end"
 		],
 		"description": "Basic strong parameters for single model"
+	},
+		"before_action (Basic)": {
+		"prefix": "myb_a",
+		"body": [
+			"before_action :${1:method_name}, only: [:${2:action}]"
+		],
+		"description": "Basic before_action with action limitation"
 	}
 }
