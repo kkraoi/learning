@@ -1,0 +1,98 @@
+{
+  "ERB output tag": {
+    "prefix": "myerb",
+    "body": "<%= ${1:code} %>",
+    "description": "Insert ERB output tag"
+  },
+	"ERB if block": {
+    "prefix": "myif",
+    "body": [
+      "<% if ${1:condition} %>",
+      "\t${2:code}",
+      "<% end %>"
+    ],
+    "description": "Insert ERB if block"
+  },
+	"ERB if-elsif-else block": {
+    "prefix": "myifelse",
+    "body": [
+      "<% if ${1:condition} %>",
+      "\t${2:code}",
+      "<% elsif ${3:condition} %>",
+      "\t${4:code}",
+      "<% else %>",
+      "\t${5:code}",
+      "<% end %>"
+    ],
+    "description": "Insert ERB if-elsif-else block"
+  },
+	"ERB each block": {
+    "prefix": "myeach",
+    "body": [
+      "<% ${1:collection}.each do |${2:element}| %>",
+      "\t${3:code}",
+      "<% end %>"
+    ],
+    "description": "Insert ERB each block"
+  },
+	"ERB form_with helper": {
+    "prefix": "myform",
+    "body": [
+      "<%= form_with(model: ${1:model}, local: true, class: '${2:form-class}') do |f| %>",
+      "  <%= f.label :${3:attribute}, class: '${4:label-class}' %>",
+      "  <%= f.text_field :${3:attribute}, class: '${5:input-class}', placeholder: '${6:placeholder}' %>",
+      "",
+      "  <%= f.label :${7:text_attribute}, class: '${4:label-class}' %>",
+      "  <%= f.text_area :${7:text_attribute}, class: '${5:input-class}', rows: 5, placeholder: '${6:placeholder}' %>",
+      "",
+      "  <%= f.submit '${8:Submit}', class: '${9:button-class}' %>",
+      "<% end %>"
+    ],
+    "description": "Insert Rails form_with helper with common fields"
+  },
+	"ERB link with icon": {
+		"prefix": "mylink",
+		"body": "<%= link_to ${1:path}, class: '${2:btn btn-primary}', data: { turbo_method: :${3:get} } do %>\n  <i class=\"fa fa-${4:icon}\"></i> ${5:Text}\n<% end %>",
+		"description": "Link with Font Awesome icon"
+	},
+	"ERB conditional class": {
+		"prefix": "myclass",
+		"body": "class=\"<%= '${1:active}' if ${2:condition} %>\"",
+		"description": "Conditional HTML class"
+	},
+	"ERB render partial": {
+		"prefix": "myrender",
+		"body": "<%= render '${1:partial}', ${2:local}: @${3:object} %>",
+		"description": "Render partial with locals"
+	},
+	"ERB console log": {
+		"prefix": "myconsole",
+		"body": "<% console %>",
+		"description": "Embedded console"
+	},
+	"ERB debug params": {
+		"prefix": "mydebug",
+		"body": "<%= debug(params) %>",
+		"description": "Display params"
+	},
+	"ERB turbo frame": {
+		"prefix": "myframe",
+		"body": "<%= turbo_frame_tag '${1:id}' do %>\n  ${2:content}\n<% end %>",
+		"description": "Turbo Frame tag"
+	},
+	"ERB turbo stream": {
+		"prefix": "mystream",
+		"body": "<%= turbo_stream.${1:action} '${2:id}' do %>\n  <%= render '${3:partial}', ${4:local}: @${5:object} %>\n<% end %>",
+		"description": "Turbo Stream action"
+	},
+	"ERB lorem ipsum": {
+		"prefix": "mylorem",
+		"body": "<%= 'Lorem ipsum dolor sit amet, ' * ${1:10} %>",
+		"description": "Generate dummy text"
+	},
+	"ERB placeholder image": {
+		"prefix": "myimage",
+		"body": "<%= image_tag 'https://placehold.co/${1:600}x${2:400}', alt: '${3:alt-text}' %>",
+		"description": "Placeholder image"
+	}
+}

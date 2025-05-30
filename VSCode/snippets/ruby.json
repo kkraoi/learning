@@ -1,0 +1,85 @@
+{
+	"YARD Method Documentation": {
+		"prefix": "myyard",
+		"body": [
+			"# ${1:Description of the method}",
+			"#",
+			"# @param ${2:param_name} [${3:Type}] ${4:description}",
+			"# @return [${5:Type}] ${6:description}",
+			"# @raise [${7:ErrorClass}] ${8:description}",
+			"# @example",
+			"#   ${9:example_code}",
+			"# @note ${10:Note here}",
+			"# @since ${11:1.0.0}"
+		],
+		"description": "YARD documentation for methods"
+	},
+	"YARD Class Documentation": {
+		"prefix": "myyardclass",
+		"body": [
+			"# ${1:Class description}",
+			"#",
+			"# @!attribute [r] ${2:attr_name}",
+			"#   @return [${3:Type}] ${4:description}",
+			"#",
+			"# @example Create instance",
+			"#   ${5:instance} = ${TM_FILENAME_BASE/(?:^|_)([a-zA-Z0-9])/\\u$1/g}.new",
+			"#",
+			"# @see http://example.com Related Documentation"
+		],
+		"description": "YARD documentation for classes"
+	},
+	"RSpec Example": {
+		"prefix": "myrspec",
+		"body": [
+			"RSpec.describe ${1:Class} do",
+			"  let(:${2:instance}) { described_class.new(${3:args}) }",
+			"",
+			"  describe '##{4:method}' do",
+			"    subject { ${2:instance}.${4:method} }",
+			"",
+			"    context 'when ${5:condition}' do",
+			"      it '${6:expectation}' do",
+			"        expect(subject).to ${7:eq(true)}",
+			"      end",
+			"    end",
+			"  end",
+			"end"
+		],
+		"description": "RSpec test structure"
+	},
+	"Type Signature": {
+		"prefix": "mytype",
+		"body": [
+			"# @type ${1:type_name} { ${2:Type} }",
+			"# @type! ${3:method_name} -> { params(${4:arg}: ${5:Type}).returns(${6:ReturnType}) }"
+		],
+		"description": "Type annotations"
+	},
+	"Exception Handling": {
+		"prefix": "myerror",
+		"body": [
+			"begin",
+			"  ${1:risky_code}",
+			"rescue ${2:ErrorClass} => e",
+			"  ${3:logger.error(\"Failed: #{e.message}\")}",
+			"  ${4:fallback_action}",
+			"ensure",
+			"  ${5:cleanup}",
+			"end"
+		],
+		"description": "Exception handling block"
+	},
+	"Strong Parameters (Basic)": {
+		"prefix": "mystpara",
+		"body": [
+			"def ${1:model}_params",
+			"  params.require(:${1:model}).permit(",
+			"    :${2:attribute},",
+			"    :${3:attribute}",
+			"  )",
+			"end"
+		],
+		"description": "Basic strong parameters for single model"
+	}
+}
