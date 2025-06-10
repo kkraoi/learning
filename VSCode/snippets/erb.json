@@ -91,8 +91,28 @@
 		"description": "Generate dummy text"
 	},
 	"ERB placeholder image": {
-		"prefix": "myimage",
+		"prefix": "mydummy",
 		"body": "<%= image_tag 'https://placehold.co/${1:600}x${2:400}', alt: '${3:alt-text}' %>",
 		"description": "Placeholder image"
-	}
+	},
+	"image_tag with full attributes": {
+		"prefix": "myimg",
+		"body": [
+			"<%= image_tag ${1:object_or_path},",
+			"  loading: \"${2:lazy}\",",
+			"  height: ${3:100},",
+			"  width: ${4:100},",
+			"  alt: \"${5:代替テキスト}\",",
+			"  class: \"${6:}\",",
+			"  fetchpriority: \"${7:high}\" %>"
+		],
+		"description": "image_tag ヘルパーに必要な属性をすべて含んだスニペット"
+	},
+	"ERB HTML Comment": {
+    "prefix": "mycommentout",
+    "body": [
+      "<!-- $1 -->"
+    ],
+    "description": "Insert HTML comment tag for ERB files"
+  }
 }
