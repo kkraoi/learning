@@ -119,7 +119,8 @@ a / b = 2.5 となる。
 - `System.out.print()`：改行せずに画面に文字を表示する
 - `int m = Math.max(a, b)`：aとbの数値を比較し、大き方の数値を返す
 - `int n = Integer.parseInt("31")`：文字列を整数値に変換する
-- `int r = new java.util.Random().nextInt(乱数の上限値)`：乱数を発生させる
+- `int r = new java.util.Random().nextInt(乱数の上限値+1)`：乱数を発生させる
+  - 0~2を出したい場合は3を引数にする
 - `String s = new java.util.Scanner(System.in).nextLine()`：キーボードから1行の文字列の入力を受け付ける
 - `int input = new java.util.Scanner(System.in).nextInt()`：キーボードから1つの整数の入力を受け付ける
 
@@ -458,3 +459,38 @@ import パッケージ名.*; // パッケージの全部のクラスをインポ
 ### APIの調べ方
 - `Java API 仕様` で検索
 - https://docs.oracle.com/javase/jp/21/docs/api/index.html
+
+## オブジェクト指向_クラスの書き方
+### TIPS
+- オブジェクト指向に基づいて作るメソッドには、基本的にstaticをつけない
+
+### フィールド
+属性のこと
+```java
+public class Matango {
+  int hp;
+  // int level = 10;
+  final int LEVEL = 10; // 定数フィールド：書き換え禁止
+}
+```
+
+### this
+自分自身のインスタンスを表す
+```java
+public void sleep() {
+  this.hp = 100;
+  System.out.println(this.name + "は、眠って回復した");
+}
+```
+※省略しても機能するが、ローカル変数や引数に同名があると、そちらが優先されるので、基本的に省略しない
+
+### クラスとメンバの命名ルール
+- クラス名：名詞、先頭大文字
+- フィールド名：名詞、キャメルケース
+- メソッド名：同士、キャメルケース
+
+### インスタンス生成
+```java
+クラス名 変数名 = new クラス名();
+Hero h = new Hero();
+```
