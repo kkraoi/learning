@@ -1,9 +1,11 @@
 public class Main {
   public static void main(String[] args) {
-    // 勇者、この世界に生まれろ
+    // 武器の定義
     Sword s = new Sword();
     s.name = "炎の剣";
     s.damage = 10;
+
+    // 勇者、この世界に生まれろ
     Hero h = new Hero();
     h.name = "猫";
     h.hp = 100;
@@ -11,21 +13,17 @@ public class Main {
     System.out.println("勇者" + h.name + "を生み出しました");
     System.out.println("現在の武器は" + h.sword.name);
 
-    // マタンゴ、この世界に生まれろ
-    Matango m1 = new Matango();
-    m1.hp = 50;
-    m1.suffix = 'A';
+    // スーパーヒーロー
+   
 
-    Matango m2 = new Matango();
-    m2.hp = 48;
-    m2.suffix = 'B';
+    // 武器
+    Weapon w = new Weapon();
+
+    // マタンゴ、この世界に生まれろ
+    PoisonMatango mp = new PoisonMatango('A');
+    mp.attack(h);
 
     // 冒険の始まり
-    h.sit(5);
-    h.slip();
-    h.sit(25);
-    h.attack();
-    h.run();
 
     // 勇者、戦え
 
