@@ -660,3 +660,96 @@ public abstract class Character () {
   public abstract void attack(Matango m);
 }
 ```
+
+## インターフェース
+- 抽象クラスの中の抽象クラス
+- 実装を持たずに定義のみを持つ
+- インターフェースとして特別扱いできる条件
+  1. 全てのメソッドが抽象
+  2. 基本的にフォールドを一つも持たない
+    - ただし、`public static final` がついたフィールド（定数）の宣言はOK
+    - `public static final double PI = 3.141592;`
+    - `double PI = 3.14` のように `public static final` を省略することができる
+- インターフェースと名がついていようとも、所詮は抽象クラス
+  - 子クラスは抽象メソッドに対してオーバーライドしなくてはいけない
+- インターフェースで定義されたメソッドはいずれも使用（オーバーライド）されなくてはならない
+- インターフェースの恵み
+  - 同じインターフェースをimplementする複数の子クラスたちに、共通のメソッド群を実装するよう強制できる
+  - あるクラスがインターフェースを実装していれば、少なくともそのインターフェースが定めたメソどは持っていると保証される
+- 「内部実装を一切定義しない」という特性によって、特別に多重継承（2つ以上の親クラスが存在する）が許される。
+- 異なる実装が衝突する問題が発生しないため、複数の親インターフェースによる多重継承が認められている。
+
+
+```java
+public interface Creature {
+  public abstract void run();
+  void run1(); // public abstract を省略できる
+  void run1(String spot); // 引数を設定しないと具象クラスで引数が使えない
+}
+```
+
+- インターフェースをを継承する場合は`extends`ではなく、`implements`を使う
+- implements は「実装する」という意味。
+- 親インターフェースで未定だった各メソッドの内容をオーバーライドして実装し確定させることが由来する。
+
+```java
+public class クラス名 implements インタフェース名 {
+
+}
+
+// 多重継承版
+public class クラス名 implements インターフェース1, インターフェース2, ... {
+
+}
+```
+
+### インタフェースの継承
+- この場合、「extends」であることに注意！
+- implements だと、メソッドを具体的に定義する（実装する）必要がある
+
+```java
+public interface Human extends Creature {
+  // 下記はHumean独自のメソッド
+  void talk();
+  void watch();
+  void hear();
+
+  // さらに自動的にCreatureのメソッドを継承する
+}
+```
+
+### extends と implements のミックス
+- 親クラスは1つだけ（多重継承禁止）
+- 
+
+```java
+public class クラス名 extends 親抽象クラス implements 親インターフェース1, 親インターフェース2, ... {
+
+}
+
+public class Fool extends Character implements Human {
+  // Character から hp や name などのフィールドを継承している
+
+  // Character から継承した抽象メソッドattack()を実装
+  public void attack(Matango m) {
+    System.out.println(this.name + "は戦わず遊んでいる");
+  }
+
+  // さらにHumankら継承した4つの中背用メソッドを実装
+  public void talk() {...}
+  public void watch() {...}
+  public void hear() {...}
+  public void run() {...}
+}
+```
+
+### デフォルト実装
+- インターフェースは原則的に処理内容を持たない抽象メソッドに限られるが、デフォルトメソッドは許される
+- 継承先でオーバーライドされなかった場合、自動的にデフォルト実装の内容でオーバーライドする。
+- 多重継承（ダイアモンドプログラム）が起こる可能性があり扱いに注意が必要
+
+```java
+default 戻り値の型 メソッド名() {
+  処理のデフォルト実装
+}
+```
