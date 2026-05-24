@@ -753,3 +753,246 @@ default 戻り値の型 メソッド名() {
   処理のデフォルト実装
 }
 ```
+
+## 多態性
+- あるものを「あえてざっくり捉える」ことで、さまざまなメリットを享受できる機能
+- 日常の多態性
+  - レンタカーを借りて運転する。厳密に言えば初めて乗る車であるのにも関わらず、何の問題なく運転できる。「細かいところは違うけど、ざっくり言えば、どの車も同じ」高級車だろうとライトバンだろうと新車だろうと問題なく運転できる。
+  - もしロボットであれば厳密な運転制御プログラムが必要。「もし2021年式のプリウスならば、ハンドルはシートからXcmの高さにあり...」
+  - 多態性のある考え => どの車も同じもの
+  - 多態性のない考え => どれも違う車
+- 本当はSuperHeroインスタンスだが、Characterとして捉えて利用する
+- あるインスタンスの捉え方は、代入する変数の型で決まる。
+- is-aの関係であるもの = 継承されているものは、変数の型とインスタンスの型が違っていても代入できる（多態性）
+- 抽象クラスやインターフェースはインスタンスを生み出せないが、それらの型を利用することはできる
+- 全く同一である一つの存在に対して、複数の異なる捉え方ができる、捉え方によって利用方法が変わる
+- 呼び出しは同じなのに、結果はそれに適したものが発揮される、ということが可能
+
+```java
+// SuperHero の親クラスに Hero
+// Hero の親クラスに CHaracter
+// があるとする
+
+Character c = new SuperHero();
+```
+
+### 型のメソッドしか呼び出せない
+```java
+public abstract class Character {
+  String name;
+  int hp;
+  public void run() {...}:
+  public abstract void attack(Monster m);
+}
+
+public class Wizeard extends Character {
+  int mp;
+  public void attack(Monster m) {...}
+  public void fireball(Monster m) {...}
+}
+
+public class Main {
+  public static void main(String[] args) {
+    Wizerd w = Wizard();
+    Character c = w;
+    Matango m = new Matango();
+    ...
+    c.attack(m);
+    c.attack(m); // コンパイルエラーが発生
+    /* ↑ 呼び出す側がWizerdだと思っていないため */
+  }
+}
+```
+
+### メソッドはどちらが実行される？
+```java
+public abstract class Monster {
+  public void run() {
+    System.out.println("A");
+  }
+}
+
+public class Slime extends Monster {
+  public void run() {
+    System.out.println("B");
+  }
+}
+
+public class Main {
+  public static void main(String[] args) {
+    Slime s = new Slime();
+    Monster m = new Slime();
+    s.run(); // B が表示
+    m.run(); // B が表示！
+  }
+}
+```
+
+### 捉え方を変更する （ダウンキャスト）
+- キャスト演算子を使う
+- 曖昧な方に入っている中身を厳密な方に代入するキャストはダウンキャストと呼ばれ、失敗の危険が伴う
+  - クラスを間違っていたら、ClassCastExceptionエラーが発生する
+
+```java
+Character c = new Wizard();
+// c.fireball(); は実行できないが、
+Wizard w = (Wizard) c; // このキャスト演算子で、Wizerd と再定義させられ、
+w.fiball(); // が実行できる
+```
+
+### ダウンキャストによるエラーを予防
+```java
+// 変数を型名の箱に代入可能なら、trueが返る
+// キャスト後格納変数名 を省略すると、キャスト可能かの判定のみを行う
+変数 instanceof 型名 キャスト後格納変数名
+
+// c の中身がSuperHeroとみなしてOKであれば、キャストしてhに代入する
+if (c instanceof SuperHero h) { 
+  h.fly();
+}
+
+// また、上記と同等の方法
+if (c instanceof SuperHero) {
+  SuperHero h = (SuperHero)c;
+  h.fly();
+}
+```
+
+### 多態性のメリット1
+- 下記のケースを考える
+  - 5人のキャラクター（Hero x2, Thief x1, Wizard x2）
+  - 彼らが宿屋に泊まり、HP50ずつ回復するプログラムを書く場合
+- そうすると
+  - コードに重複が目立つ
+  - 将来的に多くの修正が必要
+- このようなケースを解決することができる
+
+```java
+/* 前提
+- Hero・Thief・Wizardは、抽象クラスCharacterを継承している
+- Characterは、name・hpフィールドと、attack()・run()メソッドを持つ
+*/
+public class Main {
+  public static void main(String[] args) {
+    Hero h1 = new Hero();
+    Hero h2 = new Hero();
+    Thief t1 = new Thief();
+    Wizard w1 = new Wizard();
+    Wizard w2 = new Wizard();
+
+    // 宿屋に泊まる
+    h1.hp += 50;
+    h2.hp += 50;
+    t1.hp += 50;
+    w1.hp += 50;
+    w2.hp += 50;
+  }
+}
+
+// 多態性と配列を使うと...↓
+
+public class Main {
+  public static void main(String[] args) {
+    Character[] c = new Character[5];
+    c[0] = new Hero();
+    c[1] = new Hero();
+    c[2] = new Thief();
+    c[3] = new Wizerd();
+    c[4] = new Wizerd();
+
+    // 宿に泊まる
+    for (Character ch : c) { // 5人をCharacterだとみなせば回せる
+      ch.hp += 50;
+    }
+  }
+}
+```
+
+## カプセル化
+- フィールドへの読み書きやメソッドの呼び出しを制限する
+- このメソッドはクラスAからは呼び出せるが、クラスBでは呼び出せない
+- アクセス制御を行う
+- ４つのレベル（private, protected, public はアクセス修飾子という）
+  1. private：
+    - 自分自身のクラスのみアクセスを許可
+    - this を用いて読み書きができる
+  2. package private：
+    - 何も書かない指定方法。
+    - 自分と同じパッケージに属するクラスのみ許可
+  3. protected：
+    - 自分と同じパッケージに属するか、継承した子クラスのみアクセス
+  4. public：
+    - 全てのクラスからアクセスできる
+- アクセス修飾子の定石
+  - フィールドは全てprivate
+  - メソッドは全てpublic
+  - クラスは基本的にpublic
+- 基本的にフィールドはメソッド経由でアクセスするもの
+- getterとsetterを総称して「アクセサ」
+  - readOnly・writeOnly を表現できる
+  - フィールド名を変更したくなった場合、そのクラスだけで作業を完結できる
+  - setterにif文等を使うことによって、値の指定・制限をかけることができる
+- 同一クラス内のフィールドを設定する場合も、setterを使う。setterによる値チェックが活用できるため。
+- 同一クラス内のフィールドの取り出しは、直接フィールドの値を使うことが一般的だが、将来的な柔軟性を確保する目的でgetterを経由するのもあり。
+
+
+### getter
+- フィールドの値を取り出すだけのメソッド、getter
+- `インスタンス変数.フィールド`でフィールドの値を取り出さないかも
+
+```java
+public フィールドの型 getフィールド名() {
+  return this.フィールド名;
+}
+
+public class Hero {
+  private String name;
+  ...
+  public String getName() {
+    return this.name;
+  }
+}
+```
+
+### setter
+- フィールドに指定された値を代入するメソッド、setter
+
+```java
+public void setフィールド名(フィールドの型 任意の変数名) {
+  this.フィールド名 = 任意の変数名;
+}
+
+public class Hero {
+  ...
+  public void setName(String name) {
+    this.name = name;
+  }
+}
+
+// 妥当性のチェック
+public void setName(String name) {
+  if(name == null) {
+    throw new IllegalArgumentException("エラーメッセージ");
+  }
+  this.name = name;
+}
+```
+
+### クラスのアクセス制御
+- package private
+  - 何も書かない指定方法
+  - 自分と同じパッケージに属するクラスのみアクセスできる
+  - クラスの名前はソースファイルと異なってもよい
+  - 1つのソースファイルに複数のクラスを宣言してもよい
+- public
+  - 全てのクラスからアクセスできる
+  - 1つのファイルに1つのpublicクラス
+  - ファイル名 = publicクラス名
+
+### カプセル化を支える考え方
+- メソッドでフィールドを保護する
+- 外部から直接触られないように、メソッドという殻（カプセル）によってフィールドが保護されることをカプセル化
+- 不具合の多くは、フィールドに予期しない値が入ってしまうことによる。したがってフィールドを保護するのは大事
+
+### 継承関係によるアクセス制御
+- protectedアクセス修飾子がついたメンバは自分のクラスの子孫または、同じパッケージからのみアクセスが許される。

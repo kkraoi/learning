@@ -30,6 +30,10 @@ public class Hero {
     System.out.println("最終HPは" + this.hp + "でした");
   }
 
+  private void die() {
+    System.out.println(this.name + "は死んでしまった");
+  }
+
   public Hero(String name) {
     this.hp = 100;
     this.name = name;
