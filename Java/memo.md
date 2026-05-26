@@ -1755,3 +1755,351 @@ public class Main {
   }
 }
 ```
+
+## コレクション
+- コレクションフレームワーク
+  - java.utilに属している
+  - リスト
+    - 順序通りに並べて格納する
+    - 中身の重複はOK
+    - `ArrayList`, `LinkedList`
+  - セット
+    - 順序があるとは限らない
+    - 中身の常服は不可
+    - `HashSet`, `LinkedHashSet`, `TreeSet`
+  - マップ
+    - ペアで対応つけて格納する
+    - `HashMap`, `LinkedHashMap`, `TreeMap`
+- 配列と違って、インスタンスじゃないものは格納できない
+  - 基本データ型の情報を格納することはできない
+
+### ArrayList
+- 配列と似ている
+- import文を記述する
+- <>記号を使って、格納するインスタンスの方を指定する
+  - <>はジェネリクスという
+  - どんな種類のインスタンスでも格納できる
+- 宣言時のサイズ指定は不要、要素は随時追加できる
+  - データを追加しようとした時にもし、ヒープ領域が不足していれば、自動的に追加されていく
+- ただし、配列の方がメモリ効率や性能は高い
+
+配列を使ったコード
+```java
+// 配列を準備
+String[] names = new String[3];
+
+// 3人を追加
+names[0] = "tanaka";
+names[1] = "鈴木";
+names[2] = "斉藤";
+
+System.out.println(names[1]);
+```
+
+ArrayListを使ったコード
+```java
+import java.util.ArrayList;
+
+// ArrayListを準備
+ArrayList<String> names = new ArrayList<String>();
+
+// 3人を追加
+names.add("ta中");
+names.add("鈴木");
+names.add("斉藤");
+
+System.out.println(names.get(1));
+```
+
+### ラッパークラス
+- コレクションは基本データ型の情報を格納することはできないが、
+- ラッパークラスをを使用すると格納できる
+  - 基本データ型の情報を中身に保持するクラス
+  - java.lang.Byte
+  - java.lang.Short
+  - java.lang.Integer
+  - java.lang.Long
+  - java.lang.Float
+  - java.lang.Double
+  - java.lang.Character
+  - java.lang.Boolean
+- `ArrayList<int>` はダメ、`ArrayList<Integer>`はOK
+- ラッパー型 <=> 基本データ型 の自動変換機能がある
+  - これにより、`Integer i = new Integer(1);`といちいち定義してArrayListに格納する必要は無くなった
+  - オートボクシング
+  - オートアンボクシング
+
+ラッパークラスをArrayListに格納する
+```java
+import java.util.ArrayList;
+
+public class Main {
+  public static void main(String[] args) {
+    ArrayList<Integer> points = new ArrayList<Integer>();
+
+    // オートボクシングにより下記は不要
+    // Integer i1 = new Integer(1);
+    // points.add(i1);
+
+    points.add(10);
+    points.add(52);
+    for (int i : points) { // int型として扱える
+      System.out.println(i);
+    }
+  }
+}
+```
+
+### ArrayListの使い方
+- `ArrayList<Integer> points = new Array<>()`
+  - <> のように中身を空にしても良い
+  - 右を見て自動的に推測する
+  - 空の<>をダイヤモンド演算子という
+- `add(インスタンス型名)`
+  - リストの最後に要素を追加
+  - 戻り値：boolean
+- `add(int, インスタンス型名)`
+  - int番目に要素を追加
+  - 戻り値：void
+  - 上書きもできる
+- `get(int)`
+  - int番目の要素を取り出す
+- `size()`
+  - 格納されている要素数を返す
+  - 戻り値：int
+- `isEmpty()`
+  - 要素数がゼロであるかを判定
+  - 戻り値：boolean
+- `contains(インスタンス型名)`
+  - 指定要素が含まれているかを判定
+  - 戻り値：boolean
+- `indexOf(インスタンス型名)`
+  - 指定要素が何番目にあるか検索
+  - 戻り値：int
+- `clear()`
+  - 要素を全て削除する
+  - void
+- `remove(int)`
+  - int番目の要素を削除する
+  - 削除した分、前へ詰める
+- `iterator()`
+  - 要素を順に処理するイテレーターを返す
+  - 戻り値：Iterator<インスタンス型名>
+
+### 要素を順に取り出す方法
+```java
+// その1
+for (int i = 0; i  < リスト変数.size(); i++) {
+  リスト変数.get(i)
+}
+
+// その2
+for (リスト要素の型 e : リスト変数) {
+  e を使って読み書き
+}
+```
+
+### イテレーターとは
+- コレクションクラスの中身を順に取り出すための専用の道具
+- リストの要素を指し示す矢印のようなもの「↑イマココ！」
+- new演算子でインスタンスは作らない
+
+```java
+// この時点では、リストの先頭よりももっと前を刺した状態のイテレータが取得される
+Iterator<リスト要素の型> it = リスト変数.iterator();
+
+while (it.hasNext()) { // 次の要素をさせるかを判定
+  リスト要素の型 e = it.next(); // 次の要素を指し、その内容を返す
+  要素e を用いた処理
+}
+```
+
+イテレータを使ったArrayListの繰り返し処理
+```java
+import java.util.*;
+
+public class Main {
+  public static void main(String[] args) {
+    ArrayList<String> names = new ArrayList<>();
+    names.add("ほげ");
+    names.add("ほげ-た");
+    names.add("ほげいる");
+
+    Iterator<String> it = names.iterator();
+    while (it.hasNext()) {
+      String e = it.next();
+      System.out.println(e);
+    }
+  }
+}
+```
+
+## LinkedListの使い方
+- ArrayListで使えるメソッドの大抵のものが使える
+  - どちらもListインターフェースで実装されている
+  - コレクションインスタンスの変数型は曖昧な型で使うことも多い
+    - `List<String> list = new ArrayList<String>();`
+    - `List<Hero> list = new LinkedList<Hero>();`
+- ArrayListは配列を応用して作られたものだが、LinkListは連結リストと呼ばれる構造を応用して作られている
+- ガソリン自動車と電気自動車のようなもの
+- ArrayListは隙間なく並んだ箱
+- LinkedListは数珠つなぎの箱
+- ArrayListに比べて
+  - add()・remove()は早い
+    - ArrayListの場合、追加（削除）された以降の要素を玉突き方式で整理しなければいけない
+    - LinkedListは対象の要素の一つ前の藻に対して、次の要素の連結情報を書き換えるだけで良い
+  - get()のような、指定位置の要素の取得は遅い
+    - LinkedListの要素には添え字がない
+- ただし、要素数が多い場合、末尾付近の要素をadd()/remove()するときは要注意
+  - 要素にたどり着くまで延々と辿る必要がある
+
+### ポイント
+インターフェース型を活用しよう。
+引数・戻り値・ローカル変数には、極力曖昧な型を利用できないか検討し積極的に活用する。
+
+## Setクラス（集合）
+- java.util.Setインターフェースに属する
+- それぞれの要素には、重複が許されない
+- それぞれの要素には、基本的に順序関係がない
+- Listとの違い
+  - 重複した値を格納しようとすると無視される
+  - set()やget()がない
+    - Setにはn番目という概念がなく、添え字を使った操作は行えない
+    - 拡張for文やイテレータを使って取り出す
+  - 要素は順不同で取り出される
+    - 格納した順序とは異なる取り出しとなる
+    - 実行するたびに異なる順序となるかもしれない
+- 順序が保証されるSetのバリエーション
+  - LinkedHashSet
+    - 値を格納した順に整列する
+  - TreeSet
+    - 自然順序付けで整列する
+    - それぞれのクラス固有の順序となる
+      - Stringだと辞書順になる
+
+TreeSetから文字列を取り出す
+```java
+import java.util.Set;
+import java.util.TreeSet;
+
+public class Main {
+  public static void main(String[] args) {
+    Set<String> words = new TreeSet<String>();
+
+    words.add("add");
+    words.add("cat");
+    words.add("wolf");
+
+    for (String s : words) {
+      System.out.print(s + "->");
+    }
+  }
+}
+```
+
+### Setインターフェースが備えるメソッドの一覧
+- `add(要素)`
+  - セットに要素を追加
+  - 戻り値：boolean
+- `int`
+  - 格納されている要素数を返す
+  - 戻り値：int
+- `isEmpty()`
+  - 要素数がゼロであるかを判定
+  - 戻り値：boolean
+- `contains(要素)`
+  - 指定要素が含まれているか判定
+  - 戻り値：boolean
+- `clear()`
+  - 要素を全て削除する
+  - 戻り値：void
+- `remove(要素)`
+  - 指定した内容の要素を削除する
+  - 戻り値：void
+- `iterator()`
+  - 要素を順に処理するイテレータを返す
+  - 戻り値：Iterator<要素>
+
+## Mapの使い方
+- Mapとはキーと値のペアで格納するデータ構造
+- キーの重複は許されない
+  - 同じキーで異なる値をput()すると上書きする
+
+HashMapのインスタンス化
+```java
+Map<キーの型, 値の型>　マップ変数 = new HashMap<キーの型, 値の型>();
+Map<キーの型, 値の型>　マップ変数 = new HashMap<>();
+```
+
+### HashMapの備えるメソッド
+- `put(キー, 値)`
+  - マップにキーと値のペアを格納する
+  - 戻り値：値
+- `get(キー)`
+  - キーに対応する値を取得
+  - 無ければnull
+  - 戻り値：値
+- `size()`
+  - 格納されているペア数を数える
+  - 戻り値：int
+- `isEmpty()`
+  - 要素がゼロであるかを判定
+  - 戻り値：boolean
+- `containsKey(キー)`
+  - 指定データがキーに含まれているか判定
+  - boolean
+- `containsValue(値)`
+  - 指定データが値に含まれているか判定
+- `clear()`
+  - 要素を全て削除する
+  - void
+- `remove(キー)`
+  - 指定した内容の要素を削除
+  - 戻り値：値
+- `keySet()`
+  - 格納されているキーの一覧を返す
+  - 戻り値：Set<キー>
+
+HashMapクラスの利用
+```java
+import java.util.*;
+
+public class Main {
+  public static void main(String[] args) {
+    Map<String, Integer> prefs = new HashMap<String, Integer>();
+
+    prefs.put("京都府", 255);
+    prefs.put("東京都", 1215);
+    prefs.put("熊本県", 181);
+
+    int tokyo = prefs.get("東京都");
+    System.out.println("東京都の人口は、" + tokyo);
+
+    prefs.remove("京都府");
+    prefs.put("熊本県", 182);
+  }
+}
+```
+
+マップに格納された情報を1つずつ取り出す
+```java
+import java.util.*;
+
+public class Main {
+  public static void main(String[] args) {
+    Map<String, Integer> prefs = new HashMap<String, Integer>();
+
+    prefs.put("京都府", 255);
+    prefs.put("東京都", 1451);
+    prefs.put("熊本県", 135);
+
+    // 順序は保証されない
+    // 格納順に取り出したい場合はLinkedHashMap
+    // 自然順序で取り出したい場合はTreeMap
+    for (String key : prefs.keySet()) {
+      int value = prefs.get(key);
+      System.out.println(key + "の人口は、" + value);
+    }
+  }
+}
+```
