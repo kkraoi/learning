@@ -935,7 +935,6 @@ public class Main {
 - 同一クラス内のフィールドを設定する場合も、setterを使う。setterによる値チェックが活用できるため。
 - 同一クラス内のフィールドの取り出しは、直接フィールドの値を使うことが一般的だが、将来的な柔軟性を確保する目的でgetterを経由するのもあり。
 
-
 ### getter
 - フィールドの値を取り出すだけのメソッド、getter
 - `インスタンス変数.フィールド`でフィールドの値を取り出さないかも
@@ -996,3 +995,763 @@ public void setName(String name) {
 
 ### 継承関係によるアクセス制御
 - protectedアクセス修飾子がついたメンバは自分のクラスの子孫または、同じパッケージからのみアクセスが許される。
+
+## 暗黙の継承
+- toString()など、開発者が定義していなくても、自作クラスで使える
+- メソッドもフィールドも一切定義していないクラスの特定のメソッドを呼び出せるのは、暗黙の継承という仕組みがjavaに備わっているから
+- あるクラスを定義するとき、extendsで親クラスを指定しなければ、`java.lang.Object`を親クラスとして継承したとみなされる
+- java.lang.Objectが全てのクラスの祖
+  - 多態性を利用できるようになるから
+    - これによって、どんなインスタンスでもObject型の変数で代入できる
+    - どんなインスタンスでもObject型で引数を渡せる
+    - 参照型のインスタンスはなんでもObject型の変数に代入できる
+    - 基本データ型（int, long）は代入できない
+  - 全クラスが最低限備えるべきメソッドを定義できるから
+    - インスタンス同士の内容が同じかチェック
+    - インスタンスのな用を文字情報として表示する
+    - これらはクラスの種別に問わず使えた方が便利
+
+```java
+public class Empty {}
+
+public static void main(String[] args) {
+  Empty e = new Empty();
+  String s = e.toString();
+  System.out.println(s);
+}
+```
+
+### インスタンスの内容を表示したい
+```java
+public class Hero {
+  String name;
+  int hp;
+  ...
+}
+
+public class Main {
+  public static void main(String[] args) {
+    Hero h = new Hero();
+    h.name = "猫";
+    h.hp = 100;
+
+    // この表示結果は Hero@3485a5cc みたいなアドレスになる。
+    System.out.println(h.toString());
+  }
+}
+```
+
+↓ オーバーライドをするのが一般的
+
+```java
+public class Hero {
+  String name;
+  int hp;
+  ...
+
+  public String toString() {
+    return "名前：" + this.name + ", HP" + this.hp; 
+  }
+}
+
+public class Main {
+  public static void main(String[] args) {
+    Hero h = new Hero();
+    h.name = "猫";
+    h.hp = 100;
+
+    System.out.println(h.toString());
+
+    // ちなみに↓でも↑と同等の結果となる。printlnはtoString()を内部的に実行するから。
+    System.out.println(h);
+  }
+}
+```
+
+### 等値と等価の違い
+- `==` と `equals` の違い
+  - 等値「==」
+    - 同一の存在であること
+    - 同じアドレスを指している
+  - 等価「equals」
+    - 同じ内容であること
+    - 同じアドレスを指していなくてもよい
+- String型は参照型なので`==`で評価せず、`equals()`を使う
+- 等価は機械の判定はできない、何を持って意味的に同じものとみなすかの判断基準はクラスによってことなり、一律に決められない。
+  - クラスごとにequal()をオーバーライドする必要がある。
+
+名前が同じなら同じと判定するオーバーライド
+```java
+public class Hero {
+  String name;
+  int hp;
+  ...
+
+  public boolean equals(Object o) {
+    if (this == o) { return true; }
+    if (o instanceof Hero h) {
+      if (this.name.equals(h.name)) {return true; }
+    }
+    return false;
+  }
+}
+```
+
+## 静的メンバ
+- `static`キーワードが付けられたフィールドやメソッドのこと
+- 特別な事情がない限りstaticは付けない
+- インスタンスの独立性と関わりがある
+  - newによって生成された個々のインスタンスは基本的には独立した存在であるというオブジェクト指向の基本原則
+- 独立したインスタンス同士でも、共通のメンバを使いたい場合にstaticをつける
+- 使うケース
+  1. newせずに手軽に呼び出す
+    - `Intger.parseInt()`は静的メソッドとして準備されているからインスタンスを作らなくてよい
+  2. 静的メソッドを使ってインスタンスを生成するため
+    - 外部からインスタンス化を禁止しているクラスが存在する。
+    - このようなクラスはインスタンス生成を担う静的メソッドを準備しており、開発者はこれを使う
+
+### 静的フィールド
+- 静的フィールドの3つの効果
+  1. フィールド変数の実態がクラスに準備される
+    - `クラス名.静的フィールド` と記述する
+    - 個々のインスタンスではんく、クラスに対してフィールドが用意されるためである
+  2. 全インスタンスにフィールドのアドレスが参照される
+    - `インスタンス変数名.静的フィールド`でも静的フィールドの値を得られる
+  3. インスタンスを生み出さなくても共有が可能になる
+- 静的フィールドはクラス（金型）にフィールドが所属することから、「クラス変数」と呼ばれる
+
+一般的に多く用いられないが、定数と一緒に使われるケースがある
+```java
+public static final double Rate = 1.413;
+```
+
+### 静的メソッド
+- mainメソッドに使われている
+- 静的メソッドの3つの効果
+  1. メソッド自体がクラスに属するようになる
+    - その実態がインスタンスではなくクラスに属するため、クラス名を使って呼び出せる
+    - `クラス名.メソッド名();`
+  2. インスタンスにメソッドの分身が準備される
+    - インズタンスにもそのメソッドのアドレスが参照されるため、インスタンス変数からも呼び出せる
+    - `インスタンス変数名.メソッド名();`
+  3. インスタンスを生み出さなくても呼び出せる
+    - mainメソッドがstaticの理由がこれ
+- 静的メソッドの制約
+  - static がついていないフィールドやメソッドは利用できない
+    - static無しはインスタンスができて値が設定されてようやく使えるからである。
+    - 値が無いのに用いることはできない。
+
+### static インポート文
+```java
+import static パッケージ名.クラス名.静的メンバ名;
+
+// そのクラスに属する全ての静的メンバが対象となる
+import static パッケージ名.クラス名.*;
+```
+
+- java.lang.System クラスは静的フィールドとして、outを持っている
+- `import static java.lang.System.out;`と宣言すると、`out.println(...);`と扱うことができる
+
+## 文字列を操作する
+
+### 文字列を調査する
+- 内容が等しいか調べる
+  - `public boolean equals(Object o)`
+- 大文字/小文字を区別せず内容が等しいか調べる
+  - `public boolean equalsIgnoeCase(String s)`
+- 文字列長を調べる
+  - `public int length()`
+- 空文字（長さが0）か調べる
+  - `public boolean isEmpty()`
+
+### 文字列を検索する
+- 一部に文字列 s を含むか調べる
+  - `public boolean contains(String s)`
+- 文字列 s で始まるか調べる
+  - `public boolaen startsWith(String s)`
+- 文字列 s で終わるか調べる
+  - `public boolean endsWith(String s)`
+- 文字ch（文字列s）が最初に登場する位置を調べる
+  - `public int indexOf(int ch)`
+  - `public int indexOf(String str)`
+  - 文字列の先頭位置を0として、部分文字が道かった場合の位置を返す
+  - 見つからなかったら-1を返す
+- 文字ch（文字列s）を後ろから調べて最初に登場する位置を調べる
+  - `public int lastIndexOf(int ch)`
+  - `public int lastIndexOf(String str)`
+  - 文字列の先頭位置を0として、部分文字が道かった場合の位置を返す
+  - 見つからなかったら-1を返す
+
+### 文字列を切り出す
+- 指定位置の1文字を切り出す
+  - `public char charAt(int index)`
+- 指定位置から始まる文字列を任意の長さだけ取り出す
+  - `public String substring(int index)`
+  - `public String substring(int index, int endIndex)`
+
+実装例：メールアドレスからドメインだけを抽出する
+```java
+public class TextExtractor {
+    public static void main(String[] args) {
+        String email = "suzuki.taro@example.com";
+        
+        // 1. 区切り文字「@」が何番目にあるかを探す
+        int atIndex = email.indexOf("@");
+        
+        // 「@」が見つかった場合だけ処理（-1でなければ存在する）
+        if (atIndex != -1) {
+            // 2. 「@」の次の位置から、最後までを切り出す
+            String domain = email.substring(atIndex + 1);
+            
+            System.out.println("ドメイン名: " + domain); // 出力: example.com
+        }
+    }
+}
+```
+
+### 文字列を変換する
+- 大文字を小文字に変換する
+  - `public String toLowerCase()`
+- 小文字を大文字に変換する
+ - `public String toUpperCase()`
+- 前後の空白を除去する
+  - `public String trim()`
+  - `¥t`などのタブ文字も除去できる
+  - 全角スペースは除去できない
+- 文字列を置き換える
+  - `public String replace(String before, String after)`
+
+実装例：大文字小文字を無視してキーワードが含まれるか検索する
+```java
+public class SearchEngine {
+    public static void main(String[] args) {
+        // データベースにある商品名（大文字小文字が混ざっている）
+        String productName = "Apple iPhone 15 Pro";
+        
+        // ユーザーが検索窓に入力した文字（小文字で入力されたと想定）
+        String searchWord = "iphone";
+        
+        // プロのテクニック：両方を「一度小文字に変換してから」含まれるかチェックする
+        String lowerProductName = productName.toLowerCase();
+        String lowerSearchWord = searchWord.toLowerCase();
+        
+        if (lowerProductName.contains(lowerSearchWord)) {
+            System.out.println("検索ヒットしました！");
+        }
+    }
+}
+```
+
+実装例：ユーザー登録時の「入力データのクリーニング（サニタイズ）」
+```java
+public class UserRegistration {
+    public static void main(String[] args) {
+        // ユーザーが入力したID（後ろに不要なタブやスペースが混ざってしまっている状態）
+        String rawInputId = "admin_user01 \t"; 
+        
+        // 1. プロのテクニック：処理を始める前に、前後のゴミ（空白やタブ）を完全除去！
+        String cleanedId = rawInputId.trim();
+        // 全角スペース除去はstrip()を使う
+        
+        // 2. 綺麗になったデータで、未入力チェックや文字数チェックを行う
+        if (cleanedId.isEmpty()) {
+            System.out.println("IDを入力してください。");
+        } else {
+            System.out.println("ID「" + cleanedId + "」で登録を進めます。");
+            // 出力: ID「admin_user01」で登録を進めます。（綺麗に消えている！）
+        }
+    }
+}
+```
+
+### 文字列の連結方法
+- `String s = "明日は" + "晴れ";`の演算子の連結より、StringBuilderクラスを使った方が圧倒的に高速
+- StringBuilderクラス
+  - 内部に連結した文字列を蓄えるメモリ領域（バッファ）を持っている。
+  - appendメソッドを読んでバッファに文字列を追加していく
+    - 必要に応じた回数呼び出す
+  - 最後に1回だけtoString()を呼び、完成した連結済みの文字列を取り出す
+  - `public StringBuilder append(String s)`
+    - 戻り値が`StringBuilder`
+      - `sb.append("hello").append("365")`みたいにメソッドチェーンができるようにするため
+- +演算子が遅い理由
+  - Stringクラスの特性
+    - 危険な拡張を防止するためfinalによる継承の禁止の宣言
+    - Stringインスタンスの不変性：Stringインスタンスが保持する文字列情報はインスタンス作成時に初期化され、二度と変化しない
+    - 不変：参照やスレッドのような技術に関連した不具合が原理的に起こり得ないという特性を持つ
+  - `s = s + "World"`はどうなの？不変じゃなく無い？
+    - 古いインスタンスが捨てられ、新しいインスタンスが内部的に生成される
+  - ↑つまり内部でnewが行われる
+  - newは計算に比べるとJVMに大きな負荷がかかる
+- StringBuilderは「可変なクラス」
+  - appendメソッドのたびにnewを使うようなことはない
+  - バッファを拡大しながら新たな文字列を追記していく設計
+- どっちを選ぶ？
+  - 数回程度の文字連結であれば+演算子
+    - こっちの方がタイピング量が少なく読みやすい
+
+実装例：カンマ区切りの文字列（CSV風データ）を美しく作る
+```java
+import java.util.List;
+
+public class MemberListBuilder {
+    public static void main(String[] args) {
+        // データベースから数万件のデータが届いたと仮定（今回は3件で疑似再現）
+        List<String> memberIdList = List.of("ID-001", "ID-002", "ID-003");
+        
+        // 1. 大量の連結に備えて StringBuilder を用意
+        StringBuilder sb = new StringBuilder();
+        
+        for (String id : memberIdList) {
+            // 2. まずはバッファにデータを追記
+            sb.append(id);
+            // 3. すぐ後ろに区切り文字（カンマとスペース）を追記
+            sb.append(", ");
+        }
+        
+        // 【プロの技】このままだと末尾が「ID-003, 」と、余計なカンマが残ってしまう！
+        // 4. バッファが空でなければ、最後の余計な「, 」（2文字分）をスパッと削除する
+        if (sb.length() > 0) {
+            sb.delete(sb.length() - 2, sb.length());
+        }
+        
+        // 5. 最後に1回だけ取り出す
+        String result = sb.toString();
+        System.out.println("送信データ: " + result); // 出力: 送信データ: ID-001, ID-002, ID-003
+    }
+}
+```
+
+## 正規表現
+- 「直前の文字の0回の繰り返し」とは、その文字がないものもtrue
+
+### 正規表現の基本文法１
+- 通常の文字：その文字でなければならない
+
+```java
+String s = "Java";
+s.matches("Java"); // true
+s.matches("Javajava"); // false
+s.matches("java"); // false
+```
+
+### 正規表現の基本文法2
+- ピリオド：任意の1文字であればよい
+- パターン中にピリオド記号「`.`」があった場合、その部部には任意の1文字があればよい
+
+```java
+"Java".matches("J.va"); // true
+"Jeva".matches("J.va"); // true
+"Jあva".matches("J.va"); // true
+```
+
+### 正規表現の基本文法3
+- アスタリスク：直前の文字の0回以上の繰り返し
+
+```java
+"ABホゲホゲ".matches("AB*"); // true
+"ABBBB".matches("AB*"); // true
+"AB".matches("AB*"); // true
+"A".matches("AB*"); // true
+"jaaaava".matches("ja*va"); // true
+"hoge".matches("AB*"); // false
+
+"あいおxx000".matches(".*"); // 全ての文字列を許可する
+s.matches("Ma.*"); // Maで始まる任意の文字列 = startsWith("Ma");
+s.matches(".*ful"); // fulで始まる任意の文字列 = endsWith("ful");
+```
+
+### 正規表現の基本文法4
+- 波カッコ：指定回数の繰り返し
+- `{n}`：直前の文字のn回の繰り返し
+- `{n,}`：直前の文字のn回以上の繰り返し
+- `{n, m}`：直前の文字のn回以上m回以下の繰り返し
+- `?`：直前の文字の0回または1回の繰り返し
+- `+`：直前の文字の1回以上の繰り返し
+
+```java
+"HELLLO".matches("HEL{3}O"); // true
+```
+
+### 正規表現の基本文法5
+- 角カッコ：いずれかの文字
+```java
+"URL".matches("UR[LIN]"); // true
+"URI".matches("UR[LIN]"); // true
+"URN".matches("UR[LIN]"); // true
+```
+
+### 正規表現の基本文法6
+- 角カッコ内のハイフン：指定範囲のいずれかの文字
+- `[a-z]`：小文字のaからz
+- `[A-Z]`：大文字のAからZ
+- `[a-zA-Z]`：小文字のaから大文字のZ
+- `[0-9]`：0から9
+
+ちなみに、多用されるパターンは文字クラスとして定義されている
+- `¥d`：`[0-9]`と同義
+- `¥w`：`a-zA-z0-9`と同義
+- `¥s`：空白文字（スペース、タブ文字、改行文字）
+
+ちなみに特殊文字は`¥`の後につけると含めることができる
+- `¥¥`：`¥`が対象
+- `¥[`：`[`が対象
+
+### 正規表現の基本文法7
+- ハット「^」とダラー「$」：先頭と末尾
+
+```java
+"jeep".matches("^j.*p"); // true
+"jp".matches("^j.*p"); // true
+```
+
+### 実装例：プレイヤー名のチェック
+- 8文字
+- 使える文字はA~Zと0~9
+- 最初の文字に数字は使えない
+
+```java
+public boolean isValidPlayerName(String name) {
+  return name.matches("[A-Z][A-Z0-9]{7}");
+}
+```
+
+### 文字列の分裂
+```java
+public class Main {
+  public static void main(String[] args) {
+    String s = "abc,def:ghi";
+    String[] words = s.split("[,:]"); // , か : で分割
+    for (String w : words) {
+      System.out.print(w + "→");
+    }
+  }
+}
+```
+
+### 文字列の置換
+```java
+public class Main {
+  public static void main(String[] args) {
+    String s = "abc,def:ghi";
+    String w = s.replaceAll("[beh]", "X");
+    System.out.println(w); // aXc,dXf:gXi
+  }
+}
+```
+
+## 文字列の書式整形
+- format() を使う
+- static として定義されている
+- 「書式指定文字列」
+  - `%`はプレースホルダと呼ぶ
+  - `%修飾桁型`の構成
+    - 修飾
+      - 省略可能
+      - `,`：3桁ごとにカンマを入れる
+      - `0`：空き領域を0埋め
+      - `-`：左寄せ
+      - `+`：富豪を矯正表示
+    - 桁
+      - 省略可能
+      - 表示桁数を指定する
+      - n.m形式でs指定した場合、全体n桁、小数点m桁での表示となる
+    - 型
+      - 必須
+      - `d`：整数、decimal
+      - `s`：文字列
+      - `f`：少数
+      - `b`：真偽値
+
+```java
+// 戻り値：3日でスッキリわかるJava入門
+String.format("%d日で%sわかる%s入門", 3, "スッキリ", "Java");
+
+final String FORMAT = "%-9s %-13s 所持金%,6d";
+String s = String.format(FORMAT, hero.getName(), hero.getJob(), hero.getGold());
+
+// ちなみに書式を指定して画面に表示する方法
+System.out.printf(FORMAT, hero.getName(), hero.getJob(), hero.getGold());
+```
+
+## 日付と時刻
+- 基準日時（エポック）：1970年1月1日0時0分0秒
+- 日時の情報を表す形式が4つもある
+  1. long型の数値
+    - エポックから経過したミリ秒（1/1000秒）で日時情報を表現する方法
+    - コンピューターにとって扱いやすい
+    - 人間には分かりにくい
+    - long型は2時地情報以外にも用いられるので要注意s
+    - `System.currentTimeMills()`：現在日時をlong型で得られる
+  2. Date型のインスタンス
+    - `java.util.Date`クラスを使う
+    - 内部でlong値を保持している
+    - 人間にわかりやすい
+    - 現在日時をもつDateインスタンスの生成
+      - `Date d = new Date();`
+    - 指定時点の日時をもつDateインスタンスの生成
+      - `Date d = new Date(long値);`
+  3. 人間が指定しやすい「6つのint」形式
+    - 年・月・日・時・分・秒
+    - 入力値としてはintでくるのが一般的、フォームとかね
+  4. 人間が読みやすいString型のインスタンス
+    - 2023年9月18日5時53分20秒
+    - 2023/9/18 5:53:20
+    - 2023-9-18 05:53:20AM
+
+### 処理時間を計測
+```java
+public class Main {
+  public static void main(String[] args) {
+    long start = System.currentTimeMillis();
+
+    // なんらかの処理
+
+    long end = System.currentTimeMillis();
+    System.out.print("処理にかかった時間は" + (end - start) + "ミリ秒でした");
+  }
+}
+```
+
+### 現在日時を表示する
+```java
+import java.util.Date;
+
+public class Main {
+  public static void main(String[] args) {
+    Date now = new Date();
+    System.out.println(now); // Fri Nov 03 13:00:00 JST 2023
+    System.out.println(now.getTime()); // 16989490000
+
+    Date past = new Date(16989490000);
+    System.out.print(past); // Fri Nov 03 13:00:00 JST 2023
+  }
+}
+```
+
+### Date型と6つのint型の相互変換
+- java.util.Calendarクラスを使う
+
+「6つのint値」からDateインスタンスを生成する
+```java
+Calendar c = Calendar.getInstance();
+c.set(年,月,日,時,分,秒); // フル版
+c.set(Calendar.~, 値); // 個別版
+c.set(Calendar.MONTH, 値); // 月の値は0~11 2月の場合は1を入力
+Date d = c.getTime();
+```
+
+Dateインスタンスから「6つのint値」を生成する
+```java
+Calendar c = Calendar.getInstance();
+c.setTime(Date型変数);
+int year = c.get(Calendar.YEAR);
+int month = c.get(Calendar.MONTH);
+int day = c.get(Calendar.DAY);
+int hour = c.get(Calendar.HOUR);
+int minute = c.get(Calendar.MINUTE);
+int second = c.get(Calendar.SECOND);
+```
+
+6つのint値とDate型の相互変換
+```java
+import java.util.*;
+
+public class Main {
+  public static void main(String[] args) {
+    Calendar c = Calendar.getInstance();
+
+    // 6つのint値からDateインスタンスを生成
+    c.set(2023, 8, 18, 5, 53, 20);
+    c.set(Calendar.MONTH, 9); // 10月であることに注意！
+
+    Date d = c.getTime();
+    System.out.println(d);
+
+    // Dateインスタンスからint値を作成
+    Date now = new Date();
+    c.setTime(now);
+    int y = c.get(Calendar.YEAR);
+    System.out.println("今年は" + y + "年です");
+  }
+}
+```
+
+String から Date インスタンスを生成する
+```java
+SimpleDateFormat f = new SimpleDateFormat(書式文字列);
+Date d = f.parse(文字列);
+```
+
+DateインスタンスからStringを生成する
+```java
+SimpleDateFormat f = new SimpleDateFormat(書式文字列);
+String s = f.format(d);
+```
+
+String型とDate型の相互変換
+```java
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class Main {
+  public static void main(String[] args) throws Exception {
+    SimpleDateFormat f = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
+    // 文字列からDateインスタンスを生成
+    Date d = f.parse("2023/09/18 05:53:20");
+    System.out.println(d);
+
+    // Dateインスタンスから文字列を生成
+    Date now = new Date();
+    String s = f.format(now);
+    System.out.println("現在は" + s + "です");
+  }
+}
+```
+
+### Date や Calendar が抱えている問題
+1. 使い方が紛らわしいAPIが存在する
+  - 3月を指定するのに「2」と表記する、1~12ではなく0~11
+2. 並列処理で用いるとインスタンスの内容が壊れることがある
+  - 複数の処理を同時に実行するスレッドという仕組みで発生する
+3. 日付や時刻を正確かつ便利に扱うための必要な機能を十分に備えていない
+  - 最小でもミリ秒単位でしか扱えない
+  - コンピューターはナノ秒単位で動く
+  - 私たちが日常利用する「曖昧な日時」を表せない
+  - 私たちが日常利用する「時間の幅」を表せない
+
+## Time API
+- DateやCalendarと比較して直感的でわかりやすいAPI構造
+- スレッドとの併用でもインスタンスが壊れない
+
+### java.timeパッケージの代表的なクラス
+- `Instant` / `ZonedDateTime`
+  - 世界における、ある瞬間の時刻を、ナノ秒単位で厳密にさし示し保持する
+- `LocalDateTime`
+  - 日常的に使われる曖昧な日時を保持する
+- `Duration` / `Period`
+  - 2つの異なる時刻や日付の期間を保持する
+
+### より正確な「瞬間」を表すクラス
+- Instantクラス
+  - 瞬間という意味
+  - エポックからの経過時間をナノ秒で格納し、この世界における「ある瞬間」を指し示すことができる
+- ZonedDateTimeクラス
+  - Instantクラスと同様にある瞬間を格納できるクラス
+  - ただし、エポックからの経過時間ではない
+  - 形式：東京における西暦2023年8月10日 7時11分9秒 392411ナノ秒
+  - Calendarクラスの後継
+
+InstantとZonedDateTimeを利用
+```java
+import java.time.*;
+
+public class Main {
+  public static void main(String[] args) {
+    // Instantの生成
+    Instant i1 = Instant.now(); // newを使わない静的メソッド
+
+    // Instantとlong値との相互変換
+    Instant i2 = Instant.ofEpochMilli(1600705425827L);
+    long l = i2.toEpochMilli();
+
+    // ZonedDateTimeの生成
+    ZonedDateTime z1 = ZonedDateTime.now() // newを使わない静的メソッド
+    ZonedDateTime z2 = ZonedDateTime.of(2023, 1, 2, 3, 4, 5, 6, ZoneId.of("Asia/Tokyo"));
+
+    // Instant と ZonedDateTimeの相互変換
+    Instant i3 = z2.toInstant();
+    ZonedDateTime z3 = i3.atZone(ZoneId.of("Europe/London"));
+
+    // ZoneDateTimeの利用方法
+    System.out.println("東京：" + z2.getYear() + z2.getMonth() + z2.getDayOfMonth());
+    System.out.println("ロンドン：" + z3.getYear() + z3.getMonth() + z3.getDayOfMonth());
+
+    if (z2.isEqual(z3)) {
+      System.out.println("同じ瞬間だね");
+    }
+  }
+}
+```
+
+### あいまいな日時を表すクラス
+- 日常生活では、「年・月・日・時...ミリ秒」などの情報が欠落した曖昧な日時情報を使っている
+  - 子供の日は？ => 5/5
+- DateクラスやCalendarクラス、ZonedDateTimeは全情報を持つため、ミリ秒やタイムゾーンを含まない日時情報は格納し辛い
+- 旧来、Dateクラスなどでタイムゾーンを0にして対応をとってきた
+  - しかし、0にするとロンドンを意味してしまい、オブジェクト指向的に不整合となる
+- ↑ LocalDateTimeクラス を使う！
+  - タイムゾーン情報がない
+  - ※LocalDateTimeインスタンス単体では「どの瞬間をさし示しているか」を確定できない
+
+LocalDateTimeを利用する
+```java
+import java.time.*;
+
+public class Main {
+  public static void main(String[] args) {
+    // LocalDateTimeの生成方法
+    LocalDateTime l1 = LocalDateTime.now();
+    LocalDateTime l2 = LocalDateTime.of(2024, 1, 1, 9, 5, 0, 0);
+
+    // LocalDateTimeとZoneDateTimeの相互変換
+    ZonedDateTime z1 = l2.atZone(ZoneId.of("Europe/London"));
+    LocalDateTime l3 = z1.toLocalDateTime();
+  }
+}
+```
+
+各種日時クラスのメソッドを利用する
+```java
+import java.time.*;
+import java.time.format.*;
+
+public class Main {
+  public static void main(String[] args) {
+    // 文字列からLocalDateを生成
+    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+    LocalDate ldate = LocalDate.parse("2023/09/22", fmt);
+
+    // 1000日後を計算
+    LocalDate ldatep = ldate.plusDays(1000);
+    String str = ldatep.format(fmt);
+    System.out.println("1000日後は" + str);
+
+    // 現在の日付と比較
+    LocalDate now = LocalDate.now();
+    if (now.isAfter(ldatep)) {
+      System.out.println("本日は、その日より未来です");
+    }
+  }
+}
+```
+
+### 時間や期間を表すクラアス
+- Durationクラス
+  - 「時・分・秒」単位で収まる比較的短い間隔を表す場合
+- Periodクラス
+  - サマータイムや閏年なども考慮する日数ベースの間隔
+- 両クラスの静的メソッドでインスタンスを取得できる
+  - `between()`
+  - `ofDays()`
+  - `ofMonths()`
+
+Periodクラスを利用する
+```java
+import java.time.*;
+
+public class Main {
+  public static void main(String[] args) {
+    LocalDate d1 = LocalDate.of(2023, 1, 1);
+    LocalDate d2 = LocalDate.of(2023, 1, 4);
+
+    // 3日間を表すPeriodを2通りの方法で生成
+    Period p1 = Period.ofDays(3);
+    Period p2 = Period.between(d1, d2);
+
+    // d2のさらに3日後を計算する
+    LocalDate d3 = d2.plus(p2);
+  }
+}
+```
