@@ -2103,3 +2103,252 @@ public class Main {
   }
 }
 ```
+
+## 例外
+- エラーの種類3
+  1. 文法エラー Syntax Error
+    - コードの形式的誤り
+    - コンパイルするとエラーが発生
+    - コンパイラが指摘したコードの箇所を修正する
+  2. 実行時エラー Runtime Error
+    - 実行中に想定外の事態が発生して動作継続ができない
+    - 実行すると途中で強制終了
+    - あらかじめ「エラーが発生した時の対策」を記述し、事前回避
+    - いわゆる「例外的状況」
+  3. 論理エラー LogicError
+    - 記述した処理内容に誤りがある
+    - 実行すると想定外の処理結果
+    - 原因箇所を自力で探してコード修正
+
+### 例外的状況
+- PCのメモリが足りなくなった
+- 存在すべきファイルが見つからない
+- nullが入っている変数を利用しようとした
+
+### try-catch文
+- tryブロック実行中に例外的状況の発生をJVMが検知すると、処理は直ちにcatchブロックに移行する
+- tryブロックは、「この部分は例外的状況が発生する可能性がある、その検証を試みながら実行しなさい」とJVMに指示する文
+
+```java
+try {
+  通常実行される文
+} catch (例外クラス 例外インスタンス変数名) {
+  例外発生に実行される文
+}
+
+/* ２種類以上の例外をキャッチ 
+catchは上から下へ順に検索する
+*/
+try {
+  通常実行される文
+} catch (IOException e) {
+  例外発生に実行される文
+} catch (NullPointerException e) {
+  例外発生に実行される文
+} catch (例外クラス1 | 例外クラス2 e) {
+  例外クラス1 でも 例外クラス2 でもキャッチする
+} catch (Exception e) {
+  ざっくりキャッチできる
+  Exceptionの子孫をキャッチ
+} finally {
+  例外があってもなくても必ず実行する処理
+}
+```
+
+## 例外クラス
+- 発生した例外を区別できるように、それぞれの例外的状況を表すクラスが用意された
+- `Throwableインターフェース`
+  - `Errorインターフェース`
+    - 回復見込みがない致命的な状況
+    - `Error系例外クラス`
+      - catchする必要がない
+      - OutOfMemoryError
+      - ClassFormatError
+        - ファイルクラスが壊れている
+  - `Exceptionインターフェース`
+    - 回復の見込みがある状況
+    - try-catch文を書かないとコンパイルエラーになる
+    - メソッドに対応した例外クラスが定められている
+      - APIリファレンスに`throws IOException` などのように宣言文に書かれている
+    - `Exception系例外`
+      - catchすべき
+      - IOException
+      - ConnectException
+  - `RuntimeExceptionインターフェース`
+    - 回復が必須ではない状況
+    - いちいち想定するとキリがないもの
+    - `RuntimeException系例外`
+      - catchしなくても良い
+      - NullPointerException
+        - 変数がnull
+      - ArrayIndexOutOfBoundsException
+        - 配列の添え字が不正
+
+### 例外インスタンスの受け渡し
+- catch の変数eに格納された情報
+  - 例外的状況の詳細情報が詰めこまれた例外インスタンスをcatch文で指定された変数eに代入
+- 例外インスタンスが備えているメソッド
+  - `getMessage()`
+    - 例外的状況の解説文（エラーメッセージ）を取得
+  - `printStackTrace()`
+    - スタックトレースの内容を画面に出力
+    - スタックトレースとは、JVMがプログラムのメソッドを、どのような順序で呼び出し、どこで例外が発生したか、という経緯が記録された情報
+
+```java
+try {
+  FileWriter fw = new FileWriter("data.txt");
+  fw.write("hello");
+  fw.close();
+} catch(IOException e) {
+  System.out.println("エラー：" + e.getMessage());
+}
+```
+
+### 後片付け処理の対応
+```java
+import java.io.*;
+
+public class Main {
+  public static void main(String[] args) {
+    try {
+      FileWriter fw = new FileWriter("data.txt");
+      fw.write("hello");
+      fw.close(); // 例外が起きた場合、実行されない！
+    } catch (Exception e) {
+      System.out.println("何らかの例外が発生しました");
+    }
+  }
+}
+```
+
+このケースの対処法 ↓
+```java
+import java.io.*;
+
+public class Main {
+  public static void main(String[] args) {
+    FileWriter fw = null;
+    try {
+      fw = new FileWriter("data.txt");
+      fw.write("hello");
+    } catch (Exception e) {
+      System.out.println("何らかの例外が発生しました");
+    } finally { // 例外が発生してもしなくても実行される
+      if (fw != null) {
+        try {
+          fw.close();
+        } catch (IOException e) {
+          ; // close()失敗時は何もしない
+          // 空文というれっきとした構文、何もしないと明示
+        }
+      }
+    }
+  }
+}
+```
+
+↑をもっとスマートに（最新の構文）、try-with-resources文を使う
+```java
+import java.io.*;
+
+public class Main {
+  public static void main(String[] args) {
+    try (FileWriter fw = new FileWriter("data.text");) {
+      fw.write("hello");
+    } catch (Exception e) {
+      System.out.println("何らかの例外が発生しました");
+    }
+    // FileWriterクラスはjava.lang.AutoClosebleインターフェースで実装されている
+    // そのため、JVMによって自動クローズされるのでclose()は必要ない
+  }
+}
+```
+
+### 例外の伝搬
+- 例外がキャッチされない限り、メソッドのヨボだし元まで処理をたらい回しにする性質
+  - mainメソッド <- subメソッド <- subsubメソッド
+  - mianメソッドもキャッチしなければ強制終了し、伝搬は止まる
+- Exception系例外（チェック例外）はtry-catch文が必須のため、基本的に例外の伝搬は起こらない
+- メソッド宣言時に「スロー宣言」を行うと、発生するチェック例外をキャッチせず呼び出し元へ伝搬する
+- メソッド定義において、チェック例外をキャッチしないことを`throws`で宣言できる
+  - この時、メソッド内でtry-catch文によるキャッチをしなくてもコンパイルエラーにならない
+  - なぜ、コンパイルエラーにならないかというと、そのメソッドが「私はメソッドないでチェック例外が発生しても処理しませんが、私の呼び出し元が処理します」と表明するから
+- スロー宣言が含まれるメソッドを呼び出す側は、このメソッドを呼び出すと、呼び出し先で発生した例外が処理されずに自分に伝搬していく可能性があることを考慮すべき
+- スロー宣言が及ぼす影響
+  1. 呼び出しされる側のメソッドは、メソッド内部での例外のキャッチが義務ではなくなる
+  2. 呼び出す側のメソッドは、例外に伝搬してくる可能性があるメソッド呼び出しをtry-catch文で囲む義務が生まれる
+- 例外処理の方針
+  1. チェック例外を自分で処理
+    - 例外的状況をその場で処理する
+    - try-catch文で処理する
+    - 空のキャッチ文は極力避ける
+  2. チェック例外を処理せず、呼び出し元に委ねる
+    - その場では処理せず、呼び出し元に処理を任せる
+    - メソッド定義にスロー宣言を加える
+    - 委ねる例外処理の種類を表明する
+
+スロー宣言による例外伝搬の許可
+```java
+アクセス修飾子 戻り値 メソッド名(引数リスト) throws 例外クラス1, 例外クラス2, ... {
+  メソッドの処理内容
+}
+
+public static coid subsub() throws IOException {
+  FileWriter fw = new FileWriter("data.txt");
+  // try-catch文がなくてもコンパイルエラーにならない
+}
+```
+
+### JVMに例外的状況を報告する
+- 例外的状況はJVMが監視する
+- 監視中のJVMに例外的状況を報告することを「例外を投げる」「例外を送出する」と表現する
+- 例外が投げれるとJVMはそれを検知して、即座にcatchブロックの実行や例外の伝搬をする
+- `throws` と `throw` は違うので注意
+- オリジナルの例外クラスを定義することができる
+  - 大抵、既存の例外クラスを継承してオリジナル例外クラスを作る
+
+```java
+throw 例外インスタンス;
+throw new 例外クラス名("エラーメッセージ");
+```
+
+例外インスタンスを自分で投げる
+```java
+public class Person {
+  int age;
+  public void setAge(int age) {
+    if (age < 0) {
+      throw new IllegalArgumentException("年齢を0以上の数で指定してください");
+    }
+    this.age = age;
+  }
+}
+
+public class Main {
+  public static void main(String[] args) {
+    Person p = new Person();
+    p.setAge(-128); // 例外が発生する
+  }
+}
+```
+
+オリジナル例外を定義し使用する
+```java
+public class UnsupportedMusicFileException extends Exception {
+  // エラーメッセージを受け取るコンストラクタ
+  public UnsupportedMusicFileException(String msg) {
+    super(msg);
+  }
+}
+
+public class Main {
+  public static void main(String[] args) {
+    // 試験的に例外を発生させる
+    try {
+      throw new UnsupportedMusicFileException("未対応のファイルです")
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+}
+```
