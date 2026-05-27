@@ -2352,3 +2352,136 @@ public class Main {
   }
 }
 ```
+
+## ファイルを読み込む
+- ストリーム
+  - ファイルを少しずつ読んだり書いたりする機能
+  - ファイルを一度に読むとメモリが足りないため
+- FileReaderは源流にある小川のようなもの
+  - read()を呼ぶたびに1文字取り出す
+  - read()やclose()は IOExceptionを送出する可能性があり、例外処理を送る
+
+ファイルから1文字ずつ読み込む
+```java
+import java.io.*;
+
+public class Main {
+  public static void main(String[] args) throws Exception {
+    FileReader fr = new FileReader("data.txt");
+    int input = fr.read();
+    While (input != -1) {
+      System.out.print((char)input);
+      input = fr.read();
+    }
+    fr.close();
+  }
+}
+```
+
+## ファイルへ文字を書き込む
+- FileWriterを使う
+- ストリームに流した文字がファイルに書き込まれるイメージ
+
+```java
+import java.io.*;
+
+public class Main {
+  public static void main(String[] args) throws Exception {
+    FileWriter fw = new FileWriter("data.txt");
+    fw.write('そ');
+    fw.write('れ');
+    fw.write('で');
+    fw.write('は');
+    fw.close();
+  }
+}
+```
+
+## Webページを取得する
+```java
+import java.io.InputStream;
+import java.net.URL;
+
+public class Main {
+  public static void main(String[] args) throws Exception {
+    URL u = new URL("https://book.impress.co.jp/");
+    InputStream is = u.openStream(); // インターネットへ接続
+    int i = is.read();
+    while (i != -1) { // ページの終わりまで繰り返す
+      char c = (char)i;
+      System.out.print(c);
+      i = is.read();
+    }
+  }
+}
+```
+
+## データベースを操作する
+```java
+import java.sql.*;
+
+public class Main {
+  public static void main(String[] args) throws Exception {
+    Class.forName("org.h2.Driver");
+    String dburl = "jdbc:h2:/test";
+    String sql = "INSERT INTO EMPLOYEES(name) VALUES('aoki')";
+    Connection conn = DrivarManager.getConnection(dburl);
+    conn.createStatement().executeUpdate(sql);
+    conn.close();
+  }
+}
+```
+
+## GUI
+```java
+import java.awt.FlowLayout;
+import javax.swing.*;
+
+public class Main {
+  public static void main(String[] args) {
+    JFrame frame = new JFrame("初めてのGUI");
+    Jlabel label = new JLabel("Hello World");
+    JButton button = new JButton("推して");
+    frame.getContentPane().setLayout(new FlowLayout());
+    frame.getContentPane().add(label);
+    frame.getContentPane().add(button);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setSize(300,300);
+    frame.setVisible(true);
+  }
+}
+```
+
+## 現在時刻を表示するサーブレット
+```java
+import java.io.*;
+import java.util.Date;
+import javax.servlet.http.*;
+
+@WebServlet("/HelloServlet")
+public class HelloServlet extends HttpServlet {
+  protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
+    Date d = new Date();
+    PrintWriter w = res.getWriter();
+    res.setContentType("text/html");
+    w.write("<html><body>");
+    w.write("Today is " + d.toString());
+    w.write("</body></html>");
+  }
+}
+```
+
+## SpringBootによるWebAPI
+```java
+package com.example.restservice;
+
+import org.spring.framework.web.bind.annotation.*;
+
+@RestController
+public class MonseterController {
+  @GetMapping("/monster")
+  public Monster monster(@requestParam(value = "id") String id) {
+    return new Monster(id);
+  }
+}
+```
