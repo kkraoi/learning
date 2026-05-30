@@ -134,9 +134,12 @@ Hi *****! You've successfully authenticated, but GitHub does not provide shell a
 - 不具合修正 … `[Fix]`
 
 ## Git の "user.name" と "user.email" を構成していることを確認してください。
-```
+```sh
 git config --global user.name "名前"
 git config --global user.email "メールアドレス"
+
+# 設定できたか確認するコマンド
+git config --global --list
 ```
 コマンドを実行して、ユーザー名とメールアドレスを登録する必要がある。
 
