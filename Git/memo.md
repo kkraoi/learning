@@ -202,3 +202,21 @@ Revert "リバートメッセージ"
 ...略
 3）escキー → :wq　を記入して閉じる。
 4）git push origin 各自ブランチ
+
+## ローカルの設定ファイル
+- プロジェクトごとにGitの設定を行う場合
+    - この会社用プロジェクトだけは、別の仕事用メールアドレスでコミットしたい
+- ローカルファイル（.git/config）の内容で上書き
+```sh
+git config user.email
+```
+
+## おすすめのgit設定
+```sh
+# Macは改行コードに LF を使うが、Windowsは CRLF を使う
+# Gitの標準設定のままだと、Windows側が良かれと思ってコードの改行を勝手に CRLF に書き換える、これを対処
+git config --global core.autocrlf false
+
+# 大文字・小文字の区別を厳密にする
+git config --global core.ignorecase false
+```

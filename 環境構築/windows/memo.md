@@ -72,3 +72,47 @@ node -v > .node-version
                 4. あたらしいPowerShellウィンドウが出たら、下記をコマンドを実行
                     - `Set-ExecutionPolicy RemoteSigned -Scope LocalMachine`
                 5. 変更を認証する
+
+## yarn
+### 導入する
+- node.jsをインストールした状態にする
+    - `npm -v`で確認
+- `npm install -g yarn`
+- `yarn -v`
+
+## eas-cli
+### 導入する
+- `npm install -g eas-cli`
+- `eas -v`
+
+### ログインする
+- `eas login`
+- emailやユーザーネーム・パスワードを入力する
+
+### アプリを起動する
+```sh
+npx expo start
+npx expo start --tunnel
+```
+
+## ウィジェットを無効にする
+管理者ターミナルにて
+```sh
+Get-AppxPackage *WebExperience* | Remove-AppxPackage
+```
+
+## AndroidStudio
+### emulator コマンドを使えるようにする
+1. SDK Manager > Languages & Frameworks > Android SDK
+2. SDK Tools から下記をチェック（されているか確認）
+  - Android SDK Build-Tools
+  - Android Emulator
+  - Android SDK Platform-Tools
+3. Android SDK Location: からパスをコピーする
+4. 設定 > バージョン情報 > システムの詳細設定 > 環境変数 > Path に3で取得したパスをペースト&末尾に`\emulator`を追記
+5. 再起動する
+6. `emulator --version` 
+7. コマンドラインでエミュレーターを立ち上げる
+  - `emulator -list-avds` で仮想端末をリストアップ
+  - `emulator -avd @仮想端末`でエミュレーター起動
+    - 工場出荷状態にして起動したい場合は`emulator -avd @仮想端末 -wipe-data`
