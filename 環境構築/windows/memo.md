@@ -116,3 +116,15 @@ Get-AppxPackage *WebExperience* | Remove-AppxPackage
   - `emulator -list-avds` で仮想端末をリストアップ
   - `emulator -avd @仮想端末`でエミュレーター起動
     - 工場出荷状態にして起動したい場合は`emulator -avd @仮想端末 -wipe-data`
+
+## 4本スワイプをしてデスクトップを移動するとサブ画面も連動する問題
+- 特定のアプリを「すべてのデスクトップに表示」させる
+    1. トラックパッドを3本指で上へスワイプ（または Windows ＋ Tab キー）して、タスクビュー画面を開きます。
+    2. サブディスプレイ側で常に固定しておきたいアプリのウィンドウを右クリックします。
+    3. メニューから 「このウィンドウをすべてのデスクトップに表示する」 をクリックします。
+
+## Java
+### 21をインストール
+- Microsoft Build of OpenJDKを使う
+    - [ここ](https://learn.microsoft.com/ja-jp/java/openjdk/download)からダウンロード
+- windowsであれば、タイプがmsiのものを選ぶ

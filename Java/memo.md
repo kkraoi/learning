@@ -345,7 +345,7 @@ public class Main {
           System.out.println(element);
       }
   }
-  
+  i
   public static void main(String[] args) {
       int[] array = {1, 2, 3};
       System.out.println(array[1]);
@@ -2485,3 +2485,7 @@ public class MonseterController {
   }
 }
 ```
+
+## DI 依存性の注入
+- 依存性のある状態
+  - A
