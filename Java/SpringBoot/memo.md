@@ -158,3 +158,24 @@ public class XController {
     SpringがxにBeanを設定して、xという変数で、これ以降、xオブジェクト（Bean）を使用できる
 }
 ```
+
+## SpringでのDBアクセスの仕組み
+インフラ層 <=> DB を仲介する技術スタックの選択肢は複数
+- Spring Data JPA
+    - Springプロジェクトでデータアクセスを簡単に行えるようにしたもの
+- MyBatis
+    - Spring外部のライブラリ
+    - 現在人気とのこと
+- Spring JDBC
+    - Spring Framework の DBアクセス機能
+
+## Spring JDBC
+- Javaが標準で提供するJDBCを使いやすくしたプログラミング部品
+- 直接的なSQL操作が行えるため、SQLを学んだことがある人は利用しやすい
+- 処理速度はJDBCとほとんど変わらない
+
+### 利用手順
+1. pom.xmlに依存関係（dependency）を追加
+    
+2. application.properties に接続情報を追加
+3. JdbcTemplateオブジェクトを利用
