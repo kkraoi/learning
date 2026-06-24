@@ -303,15 +303,13 @@ public class ReviewRepositoryImpl implements ReviewRepository {
 	public void delete(Review review) {
 
 		String sql =
-				" DELETE             " + 
+				" DELETE              " + 
 				" FROM                " + 
-				"   t_review    " + 
-				" WHERE              " + 
-				"   review_id = ?    ";
+				"   t_review          " + 
+				" WHERE               " + 
+				"   review_id = ?     "; 
 		
-		jdbcTemplate.update(sql, 
-				review.getReviewId()
-                );
+		jdbcTemplate.update(sql, review.getReviewId());
 		
 	}
 
