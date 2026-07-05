@@ -14,6 +14,8 @@ winget install Schniz.fnm
     - `fnm env --use-on-cd --shell powershell | Out-String | Invoke-Expression`
     - これによって、プロジェクトのルートディレクトリに`.node-version`というファイルを置き、バージョンの指定をすると、そのプロジェクトをひらいたときに、そのNodeがてきようされる
 
+シェルプロファイルとは、LinuxやmacOSなどのターミナル（シェル）で、環境変数、エイリアス（ショートカット）、起動時の設定などを自動的に読み込ませるための初期化スクリプトファイル
+
 ### .node-version
 ```.node-version
 22.11.0
