@@ -1,0 +1,14 @@
+{
+  "chat.disableAIFeatures": true,
+  "editor.wordWrap": "on",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.minimap.enabled": false,
+  "editor.guides.bracketPairs": "active",
+  "files.insertFinalNewline": true,
+  "claudeCode.preferredLocation": "panel",
+  "workbench.startupEditor": "none",
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.autofetch": true
+}
