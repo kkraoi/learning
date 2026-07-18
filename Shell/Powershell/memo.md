@@ -2,7 +2,7 @@
 
 ## よく使うコマンド
 ### PowerShellのスペック確認
-```sh
+```pwsh
 $PSVersionTable
 
 # バージョンだけを見たいとき
@@ -10,6 +10,12 @@ $PSVersionTable.PSVersion
 ```
 
 ### ファイル作成
-```sh
+```pwsh
 New
+```
+
+### ファイル・フォルダ削除
+```pwsh
+rm node_modules -Recurse -Force
+rm package-lock.json -Force
 ```
